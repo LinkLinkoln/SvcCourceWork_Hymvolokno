@@ -1,0 +1,20 @@
+# Node modulesnode_modules
+npm-debug.logyarn-debug.log
+yarn-error.log
+# Build directoriesdist
+build
+# Environment files
+.env.env.local
+.env.development.env.test
+.env.production
+# Logslogs
+*.log
+# Temporary filestmp
+temp
+# Version control.git
+.gitignore
+# Docker filesDockerfile
+.dockerignore
+# IDE and editor files.vscode
+.idea*.sublime-project
+*.sublime-workspace

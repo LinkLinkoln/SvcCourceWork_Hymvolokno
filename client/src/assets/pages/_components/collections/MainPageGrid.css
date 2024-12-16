@@ -1,0 +1,38 @@
+  .service-card {
+    width: auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.11);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  }
+  
+  .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .icon {
+    font-size: 40px;
+    color: #007bff; /* Синий цвет для иконок */
+    margin-bottom: 10px;
+  }
+  .icon img{
+    width: 17%;
+  }
+  
+  h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  p {
+    font-size: 14px;
+    color: #666;
+  }
+  .GridWrap{
+    display: flex;
+    justify-content: center;
+  }

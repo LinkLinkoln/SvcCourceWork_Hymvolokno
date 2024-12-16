@@ -1,0 +1,171 @@
+header {
+  width: 100%;
+  background-color: rgba(128, 96, 68, 1);
+  color: white;
+}
+.annotation p {
+  font-size: 12.797px;
+  font-style: normal;
+  margin-top: auto;
+  margin-bottom: auto;
+  text-align: center;
+  font-weight: 600;
+  line-height: 26.18px;
+}
+.logo {
+  margin-left: 40px;
+  margin-bottom: 5px;
+  width: 300px;
+}
+.logo-user {
+  margin-left: 5px;
+
+}
+.search {
+  width: 70%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: 20%;
+}
+.search-user {
+  width: 50%;
+  margin-left: 25%;
+}
+.list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 40px;
+  gap: 39.6px;
+}
+.authorization {
+  margin-right: 40px;
+}
+.highlight {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 160px;
+  height: 100%;
+  margin-right: 30px !important;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: 0px;
+}
+.icons {
+  display: none;
+}
+
+@media (max-width: 320px) {
+  .announcement-bar {
+    height: 30px; 
+  }
+
+  .header-container {
+    padding: 8px 12px; 
+    flex-direction: column; 
+    align-items: flex-start; 
+  }
+
+  .logo {
+    width: 100px; 
+  }
+
+  .search-container {
+    display: none;
+  }
+
+  .auth-section {
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .icons-container {
+    margin-top: 10px;
+    justify-content: center;
+  }
+
+  .navigation-links {
+    padding: 10px 0; 
+    flex-direction: column; 
+    align-items: center; 
+  }
+
+  .nav-item {
+    margin-left: 0; 
+    margin-right: 0; 
+    padding: 8px 0;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 10px 15px;
+  }
+
+  .logo {
+    width: 120px; 
+  }
+
+  .icons-container {
+    margin-top: 10px;
+    justify-content: space-between; 
+  }
+
+  .navigation-links {
+    flex-direction: row; 
+    justify-content: center;
+  }
+
+  .nav-item {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+}
+
+
+@media (max-width: 1024px) {
+  .header-container {
+    padding: 15px 25px;
+  }
+
+  .logo {
+    width: 220px; 
+  }
+
+  .navigation-links {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .nav-item {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+}
+
+
+@media (min-width: 1200px) {
+  .header-container {
+    padding: 20px 40px; 
+  }
+
+  .logo {
+    width: 400px; 
+  }
+
+  .navigation-links {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .nav-item {
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+}
+

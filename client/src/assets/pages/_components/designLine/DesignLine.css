@@ -1,0 +1,19 @@
+.DesignLine
+{
+    width: 35%;
+    height: 2px;
+    background-color: rgb(199, 199, 199);
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.DesignLinePart2
+{
+    position: relative;
+    top: -4px;
+    width: 7%;
+    height: 5px;
+    background-color: rgb(59, 57, 173);
+    margin: 0 auto;
+}

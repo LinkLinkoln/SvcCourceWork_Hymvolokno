@@ -1,0 +1,118 @@
+.eventFormContainer {
+  margin-top: 50px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  color: #3e4a59; 
+  font-family: 'Roboto', sans-serif; 
+}
+
+.eventFormContainer p {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: 300;
+  color: #5a6a74;
+}
+
+.formContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  text-align: center;
+  align-items: center;
+}
+
+.formGroup,
+.formGroupAddress,
+.formGroupMessage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+
+}
+
+.formGroup input,
+.formGroupAddress input,
+.formGroupMessage textarea {
+  width: 100%;
+  max-width: 500px; 
+  margin: auto;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  transition: border-color 0.3s, box-shadow 0.3s ease;
+  background-color: #fafafa;
+  font-size: 16px;
+}
+
+.formGroup input:focus,
+.formGroupAddress input:focus,
+.formGroupMessage textarea:focus {
+  outline: none;
+  border-color: #6c757d; 
+  box-shadow: 0 0 10px rgba(108, 117, 125, 0.2);
+}
+
+.formGroupMessage textarea {
+  height: 120px;
+}
+
+.errorMessage {
+  color: #e74c3c;
+  font-size: 14px;
+  text-align: left;
+  margin-top: 5px;
+}
+
+.eventButton {
+  width: 160px;
+  height: 48px;
+  margin: 20px auto;
+  background-color: #2d3e50;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-bottom: 7%;
+}
+
+.eventButton:hover {
+  background-color: #1a242f;
+  transform: scale(1.05); 
+}
+
+
+.MuiTypography-h6 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d3e50;
+}
+
+.MuiTypography-root {
+  font-size: 16px;
+  color: #5a6a74;
+}
+
+.MuiButton-root {
+  background-color: #2d3e50;
+  color: white;
+  border-radius: 30px;
+  text-transform: uppercase;
+  font-size: 14px;
+  padding: 10px 20px;
+  margin-top: 15px;
+  transition: background-color 0.3s;
+}
+
+.MuiButton-root:hover {
+  background-color: #1a242f;
+}
+  
+
