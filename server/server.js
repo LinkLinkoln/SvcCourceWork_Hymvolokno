@@ -4,8 +4,10 @@ const path = require("path");
 const cors = require("cors");
 const sequelize = require("./config/config.js");
 require("dotenv").config();
-
+const seed = require("./seed/instrumentSeed.js")
+const seedTechnican = require("./seed/TechnicanSeed.js")
 // Middleware для обработки JSON
+
 
 app.use(express.json());
 app.use("/api/static", express.static(path.join(__dirname, "static")));
@@ -15,7 +17,6 @@ app.use(
     origin: "http://localhost:3000",
   })
 );
-
 // Импорт маршрутов
 const authRoutes = require("./routes/authRoutes");
 const clientsRouter = require("./routes/clientRoutes");
@@ -48,7 +49,8 @@ const start = async()=> {
             .catch((error) => { 
                 console.error("Error creating tables: ", error); 
             });
-
+  await seed()   
+  await seedTechnican()  
 } 
 
 // Запуск сервера

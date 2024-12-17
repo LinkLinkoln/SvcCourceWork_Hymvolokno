@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, IconButton, Divider, Link, Typography } from "@mui/material";
+import { Box, IconButton, Divider, Link, Typography, Slide } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import MapIcon from "@mui/icons-material/Map";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import MenuIcon from "@mui/icons-material/Menu"; // Иконка для выезда меню
+import ExitToAppIcon from "@mui/icons-material/ExitToApp"; // Добавляем иконку выхода
 import "./header.css";
 import Logo from "../../../img/logo.png";
 import MapModal from "../../_components/modal/mapModal/mapModal";
@@ -14,6 +16,7 @@ const Header = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openEditCourierModal, setOpenEditCourierModal] = useState(false);
   const [openEditClientModal, setOpenEditClientModal] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // Состояние для выезда меню
   const navigate = useNavigate();
   const userRole = localStorage.getItem("role");
   const userid = localStorage.getItem("id");
@@ -28,6 +31,18 @@ const Header = () => {
 
   const handleToggleEditClientModal = () => {
     setOpenEditClientModal((prev) => !prev);
+  };
+
+  const handleToggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const handleLogout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem("role");
+    localStorage.removeItem("id");
+    // Redirect to the login page
+    navigate("/login");
   };
 
   return (
@@ -61,7 +76,7 @@ const Header = () => {
           padding: "10px 20px",
           backgroundColor: "#333",
           boxSizing: "border-box",
-          flexWrap: "wrap",  // Allow flex items to wrap for small screens
+          flexWrap: "wrap",
         }}
       >
         <img
@@ -81,19 +96,19 @@ const Header = () => {
             borderRadius: "5px",
             padding: "5px 10px",
             width: "250px",
-            margin: "10px 0", 
+            margin: "10px 0",
           }}
         >
           {/* Search Input */}
         </div>
 
         <div
-          className={`auth-section ${userRole === "client" || userRole === "courier" ? "highlight" : ""}` }
-          sx={{   marginRight: "500px" }}
+          className={`auth-section ${userRole === "client" || userRole === "courier" ? "highlight" : ""}`}
+          sx={{ marginRight: "500px" }}
         >
           {userRole === "client" || userRole === "courier" ? (
             <>
-              <Typography variant="body2" color="white" >
+              <Typography variant="body2" color="white">
                 Welcome
               </Typography>
               <Link
@@ -109,6 +124,12 @@ const Header = () => {
               >
                 My account
               </Link>
+              <IconButton
+                onClick={handleLogout}
+                sx={{ color: "white", marginLeft: "16px" }}
+              >
+                <ExitToAppIcon />
+              </IconButton>
             </>
           ) : (
             <a
@@ -127,6 +148,10 @@ const Header = () => {
         </div>
 
         <Box className="icons-container" sx={{ display: "flex", alignItems: "center" }}>
+          <IconButton onClick={handleToggleMenu} sx={{ color: "white", marginRight: "16px" }}>
+            <MenuIcon /> {/* Иконка для выезда меню */}
+          </IconButton>
+
           <IconButton onClick={handleToggleModal} sx={{ color: "white", marginRight: "16px" }}>
             <MapIcon />
           </IconButton>
@@ -156,7 +181,6 @@ const Header = () => {
 
       {/* Modal components */}
       <MapModal open={openModal} onClose={handleToggleModal} />
-
       {userRole === "client" && (
         <EditClientModal clientId={userid} open={openEditClientModal} onClose={handleToggleEditClientModal} />
       )}
@@ -164,51 +188,49 @@ const Header = () => {
         <EditCourierModal open={openEditCourierModal} onClose={handleToggleEditCourierModal} />
       )}
 
-      {userRole !== "courier" && (
+      <Slide direction="left" in={menuOpen} mountOnEnter unmountOnExit>
         <Box
-          className="navigation-links"
+          className="navigation-icons"
           sx={{
-            width: "100%",
+            position: "absolute",
+            top: "140px", // Отступ сверху, чтобы меню не перекрывало другие элементы
+            right: "30px", // Размещение меню от правой стороны
+            backgroundColor: "#333",
+            padding: "10px",
+            borderRadius: "5px",
             display: "flex",
-            justifyContent: "flex-start",
-            backgroundColor: "#fff",
-            padding: "20px 0px",
-            borderTop: "1px solid #ddd",
-            flexWrap: "wrap", // Wrap links on small screens
+            flexDirection: "row", // Горизонтальное выезжание
+            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+            zIndex: 500
           }}
         >
-          <Link className="nav-item" href="/" underline="hover" color="#806044" sx={{ paddingRight: "20px", marginLeft: "20px" }}>
-            Main
-          </Link>
-          <Link className="nav-item" href="/dishes" underline="hover" color="#806044" sx={{ paddingRight: "20px" }}>
-            Dishes
-          </Link>
-          <Link
-            className="nav-item"
-            href={userRole === "client" ? "/client" : "/reviews"}
-            underline="hover"
-            color="#806044"
-            sx={{ paddingRight: "20px" }}
+          <IconButton component={Link} href="/" sx={{ color: "white", marginRight: "10px" }}>
+            <MapIcon />
+          </IconButton>
+          <IconButton component={Link} href="/dishes" sx={{ color: "white", marginRight: "10px" }}>
+            <ShoppingCartIcon />
+          </IconButton>
+          <IconButton
+            component={Link}
+            href={
+              userRole === "courier"
+                ? "http://localhost:3000/courier"
+                : userRole === "client"
+                ? "/client"
+                : "/reviews"
+            }
+            sx={{ color: "white", marginRight: "10px" }}
           >
-            {userRole === "client" ? "Cabinet" : "Reviews"}
-          </Link>
-          <Link className="nav-item" href="/event" underline="hover" color="#806044" sx={{ paddingRight: "20px" }}>
-            Events
-          </Link>
-          <Link
-            className="nav-item"
-            underline="hover"
-            onClick={handleToggleModal}
-            color="#806044"
-            sx={{
-              display: { xs: "none", md: "block" },
-              paddingRight: "20px",
-            }}
-          >
-            Map
-          </Link>
+            <PersonIcon />
+          </IconButton>
+          <IconButton component={Link} href="/event" sx={{ color: "white", marginRight: "10px" }}>
+            <ShoppingCartIcon />
+          </IconButton>
+          <IconButton component={Link} href="/map" sx={{ color: "white" }}>
+            <MapIcon />
+          </IconButton>
         </Box>
-      )}
+      </Slide>
     </header>
   );
 };

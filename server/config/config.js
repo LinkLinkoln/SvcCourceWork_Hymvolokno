@@ -8,8 +8,9 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: "postgres",
-    port: 5432
+    port: 5433
   }
+  
 );
 
 module.exports = sequelize;

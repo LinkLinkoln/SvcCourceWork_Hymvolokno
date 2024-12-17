@@ -5,7 +5,6 @@ import EventForm from "../_components/eventForm/eventForm";
 const EventPage = () => {
   return (
     <div>
-      <EventPhoto />
       <EventForm />
       <Description />
     </div>

@@ -30,7 +30,7 @@ const ClientMain = () => {
             <img alt="icon" src={icon2}></img>
           </a>
           <div className="blockText">
-            <a href="/cart">КАЛЬКУЛЯЦИЯ ИЗМЕРЕНИЙ</a>
+            <a href="/cart">СПИСОК УСЛУГ</a>
             <p>Рассчитать параметры для ваших измерений (в один клик)</p>
           </div>
         </div>
