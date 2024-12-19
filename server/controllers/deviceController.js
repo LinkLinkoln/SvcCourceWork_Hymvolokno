@@ -14,6 +14,7 @@ const addDevice = async (req, res) => {
       commissioningDate,
       calibrationInterval,
       currentStatus,
+      devicePhoto,
     } = req.body;
     const newDevice = await Device.create({
       name,
@@ -22,6 +23,7 @@ const addDevice = async (req, res) => {
       commissioningDate,
       calibrationInterval,
       currentStatus,
+      devicePhoto,
     });
     res.status(201).json(newDevice);
   } catch (error) {
@@ -42,6 +44,7 @@ const updateDevice = async (req, res) => {
       commissioningDate,
       calibrationInterval,
       currentStatus,
+      devicePhoto,
     } = req.body;
     const device = await Device.findByPk(id);
 
@@ -56,6 +59,7 @@ const updateDevice = async (req, res) => {
       commissioningDate,
       calibrationInterval,
       currentStatus,
+      devicePhoto
     });
 
     res.status(200).json(device);
@@ -125,24 +129,6 @@ const getDeviceDetails = async (req, res) => {
       .json({ message: "Ошибка при загрузке устройств", error: error.message });
   }
 };
-
-const path = require("path");
-const fs = require("fs");
-const multer = require("multer");
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Указываем папку для сохранения изображений
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname); // Получаем расширение файла
-    cb(null, Date.now() + ext); // Генерируем уникальное имя файла
-  },
-});
-
-const upload = multer({ storage });
-
-
 
 module.exports = {
   addDevice,

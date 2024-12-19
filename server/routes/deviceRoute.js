@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const fileUpload = require('express-fileupload');
 const path = require("path");
 const {
   addDevice,
@@ -12,15 +10,6 @@ const {
 } = require("../controllers/deviceController");
 
 // Настройка multer для загрузки файлов
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Укажите папку для хранения загруженных файлов
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`);
-  },
-});
-const upload = multer({ storage: storage });
 
 // Добавление нового прибора
 router.post("/", addDevice);
