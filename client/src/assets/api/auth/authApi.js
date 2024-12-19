@@ -1,9 +1,8 @@
 import axiosInstance from "../apiConfig";
 
-// Функция для входа
 export const login = async (email, password) => {
   try {
-    const response = await axiosInstance.post("/authorization/login", {
+    const response = await axiosInstance.post("/employees/login", {
       email,
       password,
     });
@@ -15,13 +14,14 @@ export const login = async (email, password) => {
 
 export const registerUser = async (formData) => {
   try {
-    const response = await axiosInstance.post("authorization/register", {
+    const response = await axiosInstance.post("/employees/register", {
       name: formData.name,
-      lastname: formData.lastname,
-      fathername: formData.fathername,
+      lastName: formData.lastName,
+      fatherName: formData.fatherName,
+      position: formData.position,
       phone: formData.phone,
       email: formData.email,
-      address: formData.address,
+      role: formData.role,
       password: formData.password,
     });
     return { data: response.data };
@@ -30,7 +30,8 @@ export const registerUser = async (formData) => {
       const message = error.response.data?.message;
       return { error: message || "Registration failed" };
     } else {
-      return { error: "Mistake. Please, try again." };
+      return { error: "An unexpected error occurred. Please try again." };
     }
   }
 };
+

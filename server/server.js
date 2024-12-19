@@ -1,13 +1,23 @@
 const express = require("express");
+const fileUpload = require("express-fileupload");
+const bodyParser = require("body-parser");
 const app = express();
 const path = require("path");
 const cors = require("cors");
 const sequelize = require("./config/config.js");
+const deviceRoutes = require("./routes/deviceRoute");
+const calibrationRoutes = require("./routes/calibrationScheduleRoute");
+const calibrationHistoryRoutes = require("./routes/calibrationHistoryRoute");
+const employeeyRoutes = require("./routes/employeeRoutes");
+const regulatoryDocumentRouter = require("./routes/regulatoryDocumentRoutes.js");
+const repairRequestRoutes = require("./routes/repairRequestRoutes");
+const UserSeed = require("./seed/UserSeed.js")
+const DeviceSeed = require("./seed/DeviceSeed.js")
 require("dotenv").config();
-const seed = require("./seed/instrumentSeed.js")
-const seedTechnican = require("./seed/TechnicanSeed.js")
+
 // Middleware для обработки JSON
 
+app.use(fileUpload());
 
 app.use(express.json());
 app.use("/api/static", express.static(path.join(__dirname, "static")));
@@ -17,29 +27,33 @@ app.use(
     origin: "http://localhost:3000",
   })
 );
-// Импорт маршрутов
-const authRoutes = require("./routes/authRoutes");
-const clientsRouter = require("./routes/clientRoutes");
-const couriersRouter = require("./routes/courierRoutes");
-const eventsRouter = require("./routes/eventRoutes");
-const ordersRouter = require("./routes/orderRoutes");
-const orderDishesRouter = require("./routes/orderedDishRoutes");
-const deliveriesRouter = require("./routes/deliveryRoutes");
-const dishesRouter = require("./routes/dishRoutes");
-const cartsRouter = require("./routes/cartRoutes");
-const reviewsRouter = require("./routes/reviewRoutes");
 
-// Подключение маршрутов к серверу
-app.use("/api/authorization", authRoutes);
-app.use("/api/clients", clientsRouter);
-app.use("/api/couriers", couriersRouter);
-app.use("/api/events", eventsRouter);
-app.use("/api/orders", ordersRouter);
-app.use("/api/orderDishes", orderDishesRouter);
-app.use("/api/deliveries", deliveriesRouter);
-app.use("/api/dishes", dishesRouter);
-app.use("/api/carts", cartsRouter);
-app.use("/api/reviews", reviewsRouter);
+app.post('/api/devices/upload-photo', (req, res) => {
+  if (!req.files || !req.files.devicePhoto) {
+    return res.status(400).send("No photo uploaded.");
+  }
+
+  const photo = req.files.devicePhoto;
+  const uploadPath = path.join(__dirname, 'static', photo.name);
+
+  photo.mv(uploadPath, (err) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+
+    // Send the file path to the client
+    res.json({ filePath: `/api/static/${photo.name}` });
+  });
+});
+
+app.use("/api/devices", deviceRoutes);
+app.use("/api/calibrationSchedules", calibrationRoutes);
+app.use("/api/calibrationHistories", calibrationHistoryRoutes);
+app.use("/api/employees", employeeyRoutes);
+app.use("/api/regulatoryDocuments", regulatoryDocumentRouter);
+app.use("/api/repairRequests", repairRequestRoutes);
+
+
 
 const start = async()=> { 
   await sequelize.sync({ force: true }) 
@@ -49,9 +63,11 @@ const start = async()=> {
             .catch((error) => { 
                 console.error("Error creating tables: ", error); 
             });
-  await seed()   
-  await seedTechnican()  
+  await UserSeed()   
+  await DeviceSeed()
+  //await seedTechnican()  
 } 
+
 
 // Запуск сервера
 const PORT = process.env.PORT || 5000;

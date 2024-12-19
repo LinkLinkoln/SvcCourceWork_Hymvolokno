@@ -1,255 +1,182 @@
 import React, { useState } from "react";
-import { registerUser } from "../../../api/auth/authApi";
-import { useNavigate } from "react-router-dom";
-import "./registration.css";
-import Cookies from "js-cookie";
+import { Box, Button, TextField, Modal, Typography, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { registerUser } from "../../../api/auth/authApi"; // Импорт метода API
 
-const Registration = () => {
-  const navigate = useNavigate();
+// Перечисление ролей
+const UserRole = Object.freeze({
+  CLIENT: "client",
+  EMPLOYEE: "courier",
+});
+
+const RegistrationModal = ({ open, onClose }) => {
   const [formData, setFormData] = useState({
-    lastname: "",
     name: "",
-    fathername: "",
+    lastName: "",
+    fatherName: "",
+    position: "",
     phone: "",
     email: "",
-    address: "",
+    role: UserRole.CLIENT, // Стартовое значение роли
     password: "",
-    confirmpassword: "",
   });
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
-    validateField(name, value);
-  };
-
-  const validateField = (name, value) => {
-    let error = "";
-
-    switch (name) {
-      case "lastname":
-        if (!value) error = "Введите фамилию.";
-        break;
-      case "name":
-        if (!value) error = "Введите имя.";
-        break;
-      case "phone":
-        if (!value) {
-          error = "Введите номер телефона.";
-        } else if (!/^[0-9]+$/.test(value)) {
-          error = "Телефон должен содержать только цифры.";
-        }
-        break;
-      case "email":
-        if (!value) {
-          error = "Введите email.";
-        } else {
-          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailPattern.test(value)) error = "Неверный формат email.";
-        }
-        break;
-      case "address":
-        if (!value) error = "Введите адрес.";
-        break;
-      case "password":
-        if (!value) {
-          error = "Введите пароль.";
-        } else if (value.length < 6) {
-          error = "Пароль должен быть не менее 6 символов.";
-        }
-        break;
-      case "confirmpassword":
-        if (!value) {
-          error = "Подтвердите пароль.";
-        } else if (value !== formData.password) {
-          error = "Пароли не совпадают.";
-        }
-        break;
-      default:
-        break;
-    }
-
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrors({});
+    e.preventDefault(); // Предотвращает перезагрузку страницы
+    setError(null);
+    setSuccess(false);
 
-    Object.keys(formData).forEach((field) =>
-      validateField(field, formData[field])
-    );
+    try {
+      const { data, error } = await registerUser(formData);
 
-    if (Object.values(errors).some((error) => error)) {
-      return;
-    }
-
-    const result = await registerUser(formData);
-
-    if (result.error) {
-      const message = result.error;
-      if (message.includes("Email already exists")) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          email: "Этот email уже зарегистрирован.",
-        }));
-      } else if (message.includes("Phone already exists")) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          phone: "Этот номер телефона уже зарегистрирован.",
-        }));
+      if (error) {
+        setError(error); // Показываем ошибку
       } else {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          submit: message || "Ошибка регистрации.",
-        }));
+        setSuccess(true); // Успешная регистрация
+        setFormData({
+          name: "",
+          lastName: "",
+          fatherName: "",
+          position: "",
+          phone: "",
+          email: "",
+          role: UserRole.CLIENT, // Сбрасываем роль после успешной регистрации
+          password: "",
+        });
+        onClose(); // Закрываем модальное окно после успешной регистрации
       }
-      return;
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
     }
-
-    const { accessToken, refreshToken, user } = result.data;
-    localStorage.setItem("id", user.id);
-    localStorage.setItem("role", "client");
-    localStorage.setItem("accessToken", accessToken);
-    Cookies.set("refreshToken", refreshToken, {
-      expires: 7,
-      secure: true,
-      sameSite: "Strict",
-    });
-
-    setFormData({
-      name: "",
-      lastname: "",
-      fathername: "",
-      phone: "",
-      email: "",
-      address: "",
-      password: "",
-      confirmpassword: "",
-    });
-    setTimeout(() => {
-      navigate("/client");
-    }, 2000);
   };
 
   return (
-    <div className="registrationContainer">
-      <form className="registrationForm" onSubmit={handleSubmit}>
-        <h2>Регистрация для метрологов</h2>
-        <p>Создайте учетную запись для работы с web-приложением</p>
+    <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 400,
+          bgcolor: "background.paper",
+          border: "2px solid #000",
+          boxShadow: 24,
+          p: 4,
+        }}
+      >
+        <Typography variant="h6" component="h2" mb={2}>
+          Register Employee
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+            required
+          />
+          <TextField
+            label="Last Name"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+            required
+          />
+          <TextField
+            label="Father Name"
+            name="fatherName"
+            value={formData.fatherName}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Position"
+            name="position"
+            value={formData.position}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+            required
+          />
+          <TextField
+            label="Phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+            required
+          />
+          <TextField
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+            required
+            type="email"
+          />
 
-        <div className="inputs">
-          <label>
-            Фамилия*
-            <input
-              type="text"
-              name="lastname"
-              value={formData.lastname}
-              onChange={handleChange}
+          {/* Выбор роли через Select */}
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel>Role</InputLabel>
+            <Select
+              value={formData.role}
+              onChange={handleInputChange}
+              label="Role"
+              name="role"
               required
-            />
-          </label>
-          {errors.lastname && <p className="error">{errors.lastname}</p>}
+            >
+              <MenuItem value={UserRole.CLIENT}>Client</MenuItem>
+              <MenuItem value={UserRole.EMPLOYEE}>Employee</MenuItem>
+            </Select>
+          </FormControl>
 
-          <label>
-            Имя*
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </label>
-          {errors.name && <p className="error">{errors.name}</p>}
-
-          <label>
-            Отчество
-            <input
-              type="text"
-              name="fathername"
-              value={formData.fathername}
-              onChange={handleChange}
-            />
-          </label>
-
-          <label>
-            Телефон*
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-            />
-          </label>
-          {errors.phone && <p className="error">{errors.phone}</p>}
-
-          <label>
-            Email*
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </label>
-          {errors.email && <p className="error">{errors.email}</p>}
-
-          <label>
-            Адрес*
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-            />
-          </label>
-          {errors.address && <p className="error">{errors.address}</p>}
-
-          <label>
-            Пароль*
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </label>
-          {errors.password && <p className="error">{errors.password}</p>}
-
-          <label>
-            Подтверждение пароля*
-            <input
-              type="password"
-              name="confirmpassword"
-              value={formData.confirmpassword}
-              onChange={handleChange}
-              required
-            />
-          </label>
-          {errors.confirmpassword && (
-            <p className="error">{errors.confirmpassword}</p>
+          <TextField
+            label="Password"
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+            required
+            type="password"
+          />
+          {error && (
+            <Typography variant="body2" color="error" mt={2}>
+              {error}
+            </Typography>
           )}
-        </div>
-
-        <button type="submit" className="submitButton">
-          Зарегистрироваться
-        </button>
-
-        <div className="cancelLink">
-          <a href="/login">Отмена</a>
-        </div>
-
-        {errors.submit && <p className="error">{errors.submit}</p>}
-      </form>
-    </div>
+          {success && (
+            <Typography variant="body2" color="success" mt={2}>
+              Registration successful!
+            </Typography>
+          )}
+          <Box mt={2} display="flex" justifyContent="flex-end">
+            <Button variant="outlined" onClick={onClose} sx={{ mr: 1 }}>
+              Cancel
+            </Button>
+            <Button variant="contained" type="submit">
+              Register
+            </Button>
+          </Box>
+        </form>
+      </Box>
+    </Modal>
   );
 };
 
-export default Registration;
+export default RegistrationModal;

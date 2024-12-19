@@ -1,483 +1,192 @@
-import React, { useEffect, useState, useCallback } from "react";
-import {
-  fetchAvailableOrders,
-  fetchSortedOrders,
-  takeOrder,
-} from "../../../../api/deliveryApi/deliveryApi";
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Typography,
-  Collapse,
-  IconButton,
-  Snackbar,
-  Alert,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import React, { useState, useEffect } from "react";
+import { Modal, Button, TextField, Avatar } from "@mui/material"; 
+import { updateDevice, uploadDevicePhoto, deleteDevice, getDevices, getDivecePhotoUrl } from "../../../../api/deviceApi/deviceApi";
+import axiosInstance from "../../../../api/apiConfig"
 
-const AvailableOrders = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [openRows, setOpenRows] = useState({});
-  const [sortConfig, setSortConfig] = useState({
-    sortBy: "Price",
-    order: "ASC",
-  });
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState("success");
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const userId = localStorage.getItem("id");
+const DeviceList = () => {
+  const [devices, setDevices] = useState([]);
+  const [status, setStatus] = useState(""); 
+  const [selectedDevice, setSelectedDevice] = useState(null); 
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isEditing, setIsEditing] = useState(false); 
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const result = await fetchAvailableOrders();
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setOrders(result.data);
-    }
-    setLoading(false);
-  }, []);
-
-  const fetchOrdersSorted = async (sortBy, order) => {
-    setLoading(true);
-    setError(null);
-    const result = await fetchSortedOrders(sortBy, order);
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setOrders(result.data);
-      setSortConfig({ sortBy, order });
-    }
-    setLoading(false);
-  };
+  // Состояние для хранения выбранного фото
+  const [photo, setPhoto] = useState(null);
 
   useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+    const fetchDevices = async () => {
+      try {
+        const data = await getDevices(status);
+        setDevices(data);
+      } catch (error) {
+        console.error("Error fetching devices:", error);
+      }
+    };
+    fetchDevices();
+  }, [status]);
 
-  const handleToggleRow = (id) => {
-    setOpenRows((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleTakeOrder = (orderId) => {
-    setSelectedOrderId(orderId);
-    setOpenModal(true);
-  };
-
-  const handleConfirmOrder = async () => {
-    const id = userId.userId || userId;
-    const result = await takeOrder(id, selectedOrderId);
-    if (result.error) {
-      setSnackbarMessage(result.error);
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
-    } else {
-      setSnackbarMessage("Delivery has been added to current deliveries.");
-      setSnackbarSeverity("success");
-      setOpenSnackbar(true);
-      await fetchOrders(); // Обновляем список заказов
+  const handleDelete = async (id) => {
+    try {
+      await deleteDevice(id);
+      setDevices(devices.filter(device => device.id !== id)); // Удаление из списка
+    } catch (error) {
+      console.error("Error deleting device:", error);
     }
-    setOpenModal(false);
-    setSelectedOrderId(null);
+  };
+
+  const handleOpenModal = (device) => {
+    setSelectedDevice(device);
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setOpenModal(false);
-    setSelectedOrderId(null);
+    setIsModalOpen(false);
+    setIsEditing(false); // Сбросить состояние редактирования при закрытии модального окна
+    setPhoto(null); // Очистить выбранное фото при закрытии
   };
 
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
+ const handleSaveChanges = async () => {
+  if (selectedDevice) {
+    try {
+      const formData = new FormData();
+      formData.append("name", selectedDevice.name);
+      formData.append("type", selectedDevice.type);
+      formData.append("serialNumber", selectedDevice.serialNumber);
+      formData.append("commissioningDate", selectedDevice.commissioningDate);
+      formData.append("calibrationInterval", selectedDevice.calibrationInterval);
+      formData.append("currentStatus", selectedDevice.currentStatus);
 
-  const handleSortByDate = () => {
-    fetchAvailableOrders();
-    const newOrder =
-      sortConfig.sortBy === "Date" && sortConfig.order === "ASC"
-        ? "DESC"
-        : "ASC";
-    fetchOrdersSorted("Date", newOrder);
-  };
+      // If a photo is selected, upload it
+      if (photo) {
+        const photoData = new FormData();
+        photoData.append("devicePhoto", photo);
 
-  const handleSortByPrice = () => {
-    fetchAvailableOrders();
-    const newOrder =
-      sortConfig.sortBy === "Price" && sortConfig.order === "ASC"
-        ? "DESC"
-        : "ASC";
-    fetchOrdersSorted("Price", newOrder);
-  };
+        // Upload the photo and get the file path
+        const photoResponse = await uploadDevicePhoto(photoData);
 
-  if (loading) {
-    return (
-      <Typography
-        variant="h6"
-        sx={{ display: "flex", justifyContent: "center" }}
-      >
-        Loading...
-      </Typography>
-    );
+        // Add the photo path to formData
+        formData.append("devicePhoto", photoResponse.filePath);  // Save the photo path in the device data
+        selectedDevice.devicePhoto = photoResponse;
+      }
+
+      // Update the device on the server
+      const updatedDevice = await updateDevice(selectedDevice.id, formData);
+
+      const a = getDivecePhotoUrl(selectedDevice.devicePhoto);
+      console.log(a.name);
+      // Update the device list
+      setDevices(devices.map((device) =>
+        device.id === updatedDevice.id ? updatedDevice : device
+      ));
+
+      // Close the modal and reset the state
+      setIsEditing(false);
+      setPhoto(null);
+    } catch (error) {
+      console.error("Error saving changes:", error);
+    }
   }
+};
 
-  if (error) {
-    return (
-      <Typography
-        variant="h6"
-        color="error"
-        sx={{ display: "flex", justifyContent: "center" }}
-      >
-        {error}
-      </Typography>
-    );
-  }
+  
+  
 
-  if (orders.length === 0) {
-    return (
-      <div style={{ display: "flex", justifyContent: "column" }}>
-        <Typography
-          variant="h6"
-          sx={{
-            textAlign: "center",
-            margin: "70px auto",
-            color: "rgba(128, 96, 68, 1)",
-            fontSize: "35px",
-          }}
-        >
-          No available orders
-        </Typography>
-        <a
-          href="/courier"
-          style={{
-            display: "block",
-            textAlign: "center",
-            marginTop: "40px",
-            marginBottom: "40px",
-            textDecoration: "none",
-            fontSize: "24px",
-            color: "rgba(128, 96, 68, 1)",
-          }}
-        >
-          Return back
-        </a>
-      </div>
-    );
-  }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setSelectedDevice((prevDevice) => ({
+      ...prevDevice,
+      [name]: value,
+    }));
+  };
+
+  const handlePhotoChange = (event) => {
+    setPhoto(event.target.files[0]); // Сохраняем файл, выбранный пользователем
+  };
 
   return (
     <div>
-      <div
-        style={{
-          marginTop: "20px",
-          marginBottom: "20px",
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: "10px",
-        }}
-      >
-        <Button
-          onClick={handleSortByDate}
-          variant={sortConfig.sortBy === "Date" ? "contained" : "outlined"}
-          sx={{
-            borderColor: "rgba(128, 96, 68, 1)",
-            backgroundColor:
-              sortConfig.sortBy === "Date"
-                ? "rgba(128, 96, 68, 1)"
-                : "transparent",
-            color:
-              sortConfig.sortBy === "Date" ? "white" : "rgba(128, 96, 68, 1)",
-            "@media(max-width:400px)": {
-              fontSize: "10px",
-            },
-          }}
-        >
-          Sort by Date{" "}
-          {sortConfig.sortBy === "Date"
-            ? sortConfig.order === "ASC"
-              ? "↑"
-              : "↓"
-            : ""}
-        </Button>
-        <Button
-          onClick={handleSortByPrice}
-          variant={sortConfig.sortBy === "Price" ? "contained" : "outlined"}
-          sx={{
-            borderColor: "rgba(128, 96, 68, 1)",
-            backgroundColor:
-              sortConfig.sortBy === "Price"
-                ? "rgba(128, 96, 68, 1)"
-                : "transparent",
-            color:
-              sortConfig.sortBy === "Price" ? "white" : "rgba(128, 96, 68, 1)",
-            "@media(max-width:400px)": {
-              fontSize: "10px",
-            },
-          }}
-        >
-          Sort by Amount{" "}
-          {sortConfig.sortBy === "Price"
-            ? sortConfig.order === "ASC"
-              ? "↑"
-              : "↓"
-            : ""}
-        </Button>
+      <h2>Devices List</h2>
+      <div>
+        <button onClick={() => setStatus("active")}>Active</button>
+        <button onClick={() => setStatus("inactive")}>Inactive</button>
+        <button onClick={() => setStatus("")}>All</button>
       </div>
-      <Box
-        sx={{
-          width: "100%",
-          overflowX: "auto",
-          margin: "auto",
-          marginTop: "20px",
-          padding: "0",
-        }}
-      >
-        <TableContainer
-          sx={{ width: "100%", margin: "auto", marginTop: "20px" }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    fontSize: "1rem",
-                    "@media(max-width:540px)": {
-                      paddingRight: "3px",
-                    },
-                    "@media(max-width:328px)": {
-                      paddingRight: "1px",
-                    },
-                  }}
-                >
-                  Address
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    fontSize: "1rem",
-                    "@media(max-width:540px)": {
-                      paddingRight: "3px",
-                    },
-                    "@media(max-width:328px)": {
-                      paddingRight: "1px",
-                    },
-                  }}
-                >
-                  Status
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    fontSize: "1rem",
-                    "@media(max-width:540px)": {
-                      paddingRight: "3px",
-                    },
-                    "@media(max-width:328px)": {
-                      paddingRight: "1px",
-                    },
-                  }}
-                >
-                  Amount
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    fontSize: "1rem",
-                    "@media(max-width:540px)": {
-                      paddingRight: "3px",
-                    },
-                    "@media(max-width:328px)": {
-                      paddingRight: "1px",
-                    },
-                  }}
-                >
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {orders.map((order) => (
-                <React.Fragment key={order.id}>
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        "@media(max-width:540px)": {
-                          padding: "0px",
-                        },
-                      }}
-                    >
-                      <IconButton onClick={() => handleToggleRow(order.id)}>
-                        <ExpandMoreIcon
-                          className={openRows[order.id] ? "rotated" : ""}
-                          sx={{
-                            transition: "transform 0.3s",
-                            transform: openRows[order.id]
-                              ? "rotate(180deg)"
-                              : "rotate(0deg)",
-                          }}
-                        />
-                      </IconButton>
-                      {order.deliveryAddress}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        "@media(max-width:540px)": {
-                          paddingRight: "3px",
-                        },
-                        "@media(max-width:328px)": {
-                          paddingRight: "1px",
-                        },
-                      }}
-                    >
-                      {order.status}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        "@media(max-width:540px)": {
-                          paddingRight: "3px",
-                        },
-                        "@media(max-width:328px)": {
-                          paddingRight: "1px",
-                        },
-                      }}
-                    >
-                      {order.totalAmount}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        "@media(max-width:540px)": {
-                          paddingRight: "3px",
-                        },
-                        "@media(max-width:328px)": {
-                          paddingRight: "1px",
-                        },
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        onClick={() => handleTakeOrder(order.id)}
-                        sx={{
-                          textTransform: "none",
-                          fontWeight: "bold",
-                          backgroundColor: "rgba(128, 96, 68, 1)",
-                          "@media(max-width:540px)": {
-                            fontSize: "10px",
-                            width: "13px",
-                          },
-                        }}
-                      >
-                        Accept
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      style={{ paddingBottom: 0, paddingTop: 0 }}
-                    >
-                      <Collapse
-                        in={openRows[order.id]}
-                        timeout="auto"
-                        unmountOnExit
-                      >
-                        <div
-                          style={{
-                            padding: "16px",
-                            backgroundColor: "rgba(128, 96, 68, 0.4)",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                            Additional Information
-                          </Typography>
-                          <Typography>
-                            Delivery Date:{" "}
-                            {new Date(order.deliveryDate).toLocaleString()}
-                          </Typography>
-                          <Typography>
-                            Client Name: {order.clientFullName}
-                          </Typography>
-                          <Typography>Ordered Dishes:</Typography>
-                          <ul>
-                            {order.orderedDishes.map((dish, index) => (
-                              <li key={index}>
-                                {dish.dishName} - Quantity: {dish.quantity},
-                                Price: {dish.totalPrice}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </Collapse>
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-      <a
-        href="/courier"
-        style={{
-          display: "block",
-          textAlign: "center",
-          marginTop: "40px",
-          marginBottom: "40px",
-          textDecoration: "none",
-          fontSize: "24px",
-          color: "rgba(128, 96, 68, 1)",
-        }}
-      >
-        Return back
-      </a>
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        sx={{
-          backgroundColor: "rgba(128, 96, 68, 1)",
-          color: "white",
-          display: "flex",
-          justifyContent: "center",
-          alignContent: "center",
-          alignSelf: "center",
-        }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+      <ul>
+        {devices.map((device) => (
+          <li key={device.id}>
+            <div>
+              <Avatar alt={device.name} src={getDivecePhotoUrl(device.devicePhoto)} />
+              <h3>{device.name}</h3>
+              <p>{device.position}</p>
+              <p>{device.status}</p>
+              <button onClick={() => handleOpenModal(device)}>Details</button>
+              <button onClick={() => handleDelete(device.id)}>Delete</button>
+            </div>
+          </li>
+        ))}
+      </ul>
 
-      <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Confirm Order Acceptance</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to accept this order?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmOrder} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Модальное окно для подробной информации и редактирования */}
+      <Modal open={isModalOpen} onClose={handleCloseModal}>
+        <div style={{ padding: "20px", backgroundColor: "white", margin: "50px auto", width: "300px", borderRadius: "8px" }}>
+          {selectedDevice && (
+            <>
+              <h2>Device Details</h2>
+              <div>
+                <Avatar alt={selectedDevice.name} src={getDivecePhotoUrl(selectedDevice.devicePhoto)} />
+              </div>
+              <form>
+                <TextField
+                  label="Название"
+                  value={selectedDevice.name}
+                  onChange={handleChange}
+                  name="name"
+                  disabled={!isEditing}
+                  fullWidth
+                />
+                <TextField
+                  label="Серийный номер"
+                  value={selectedDevice.serialNumber}
+                  disabled // Disable the serial number field to prevent editing
+                  fullWidth
+                />
+                <TextField
+                  label="Текущий статус"
+                  value={selectedDevice.currentStatus}
+                  onChange={handleChange}
+                  name="currentStatus"
+                  disabled={!isEditing}
+                  fullWidth
+                />
+
+                {/* Поле для выбора фото, доступное только в режиме редактирования */}
+                {isEditing && (
+                  <div>
+                    <input
+                      type="file"
+                      onChange={handlePhotoChange}
+                    />
+                  </div>
+                )}
+
+                <div style={{ marginTop: "20px" }}>
+                  <Button onClick={handleCloseModal} color="secondary">
+                    Close
+                  </Button>
+                  <Button 
+                    onClick={isEditing ? handleSaveChanges : () => setIsEditing(true)} 
+                    color="primary"
+                  >
+                    {isEditing ? "Save Changes" : "Edit"}
+                  </Button>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };
 
-export default AvailableOrders;
+export default DeviceList;
