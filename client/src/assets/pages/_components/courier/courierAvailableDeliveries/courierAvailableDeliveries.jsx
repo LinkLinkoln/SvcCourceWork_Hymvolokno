@@ -72,8 +72,6 @@ const DeviceList = () => {
       // Update the device on the server
       const updatedDevice = await updateDevice(selectedDevice.id, formData);
 
-      const a = getDivecePhotoUrl(selectedDevice.devicePhoto);
-      console.log(a.name);
       // Update the device list
       setDevices(devices.map((device) =>
         device.id === updatedDevice.id ? updatedDevice : device
