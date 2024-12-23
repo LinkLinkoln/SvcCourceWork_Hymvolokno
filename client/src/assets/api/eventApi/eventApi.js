@@ -31,10 +31,10 @@ export const deleteEvent = async (eventId) => {
   }
 };
 
-export const fetchEvents = async (clientid) => {
+export const fetchEvents = async (employeeId) => { 
   try {
     const response = await axiosInstance.get("/events", {
-      params: { clientid },
+      params: { employeeId }, 
     });
     return response.data;
   } catch (error) {
@@ -42,3 +42,26 @@ export const fetchEvents = async (clientid) => {
     throw error;
   }
 };
+
+export const fetchAllEvents = async (role = 'client') => {
+  try {
+    const response = await axiosInstance.get("events/events", {
+      params: { role }, 
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error; 
+  }
+};
+
+
+
+
+
+
+
+
+
+
+

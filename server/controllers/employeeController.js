@@ -268,6 +268,7 @@ const loginEmployee = async (req, res) => {
   }
 };
 
+
 module.exports = {
   addEmployee,
   assignResponsibility,

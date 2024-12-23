@@ -15,9 +15,19 @@ const Form = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const role = localStorage.getItem("role");
     const clientid = localStorage.getItem("id");
+    const employeeId = localStorage.getItem("id"); // Получаем employeeId из localStorage
 
+    // Проверяем, что employeeId существует
+    if (!employeeId) {
+      setModalMessage("Ошибка: ID сотрудника отсутствует.");
+      setModalOpen(true);
+      return;
+    }
+
+    // Проверяем валидность телефона
     if (!/^\d+$/.test(phone)) {
       setPhoneError("Номер телефона должен содержать только цифры.");
       return;
@@ -25,6 +35,7 @@ const Form = () => {
       setPhoneError("");
     }
 
+    // Проверяем дату события
     const selectedDate = new Date(date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -36,6 +47,7 @@ const Form = () => {
       setDateError("");
     }
 
+    // Проверяем роль пользователя
     if (role !== "client") {
       setModalMessage("Пожалуйста, войдите как клиент для бронирования события.");
       setModalOpen(true);
@@ -43,7 +55,8 @@ const Form = () => {
     }
 
     try {
-      await addEvent({ clientid, date, address, message, phone });
+      // Передаём employeeId вместе с другими данными
+      await addEvent({ clientid, date, address, message, phone, employeeId });
       setModalMessage(
         "Событие успешно забронировано! Вы можете просмотреть детали в вашем профиле."
       );
@@ -67,7 +80,6 @@ const Form = () => {
       <form onSubmit={handleSubmit} className="formContainer">
         <div className="formGroup">
           <p>Номер телефона*</p>
-          <label htmlFor="phone"></label>
           <input
             type="tel"
             id="phone"
@@ -79,7 +91,6 @@ const Form = () => {
         </div>
         <div className="formGroup">
           <p>Дата события*</p>
-          <label htmlFor="date"></label>
           <input
             type="date"
             id="date"
@@ -90,8 +101,7 @@ const Form = () => {
           {dateError && <p className="errorMessage">{dateError}</p>}
         </div>
         <div className="formGroupAddress">
-          <p>Адрес события (по желанию)</p>
-          <label htmlFor="address"></label>
+          <p>Адрес события*</p>
           <input
             type="text"
             id="address"
@@ -102,7 +112,6 @@ const Form = () => {
         </div>
         <div className="formGroupMessage">
           <p>Ваше сообщение*</p>
-          <label htmlFor="message "></label>
           <textarea
             id="message"
             value={message}
@@ -125,34 +134,17 @@ const Form = () => {
             width: 400,
             bgcolor: "background.paper",
             boxShadow: 24,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
             p: 4,
+            textAlign: "center",
             borderRadius: 2,
-            "@media (max-width:500px)": {
-              width: 280,
-              padding: "20px!important",
-            },
           }}
         >
-          <Typography variant="h6" component="h2">
-            Уведомление
-          </Typography>
+          <Typography variant="h6">Уведомление</Typography>
           <Typography sx={{ mt: 2 }}>{modalMessage}</Typography>
           <Button
             onClick={() => setModalOpen(false)}
             variant="contained"
-            sx={{
-              backgroundColor: "#2C3E50",
-              color: "white",
-              marginTop: "20px",
-              "&:hover": {
-                backgroundColor: "#1A252F",
-              },
-            }}
+            sx={{ mt: 2 }}
           >
             Закрыть
           </Button>

@@ -11,6 +11,7 @@ const calibrationHistoryRoutes = require("./routes/calibrationHistoryRoute");
 const employeeyRoutes = require("./routes/employeeRoutes");
 const regulatoryDocumentRouter = require("./routes/regulatoryDocumentRoutes.js");
 const repairRequestRoutes = require("./routes/repairRequestRoutes");
+const eventRoutes = require("./routes/eventRoutes.js")
 const UserSeed = require("./seed/UserSeed.js")
 const DeviceSeed = require("./seed/DeviceSeed.js")
 require("dotenv").config();
@@ -52,6 +53,7 @@ app.use("/api/calibrationHistories", calibrationHistoryRoutes);
 app.use("/api/employees", employeeyRoutes);
 app.use("/api/regulatoryDocuments", regulatoryDocumentRouter);
 app.use("/api/repairRequests", repairRequestRoutes);
+app.use("/api/events", eventRoutes)
 
 
 

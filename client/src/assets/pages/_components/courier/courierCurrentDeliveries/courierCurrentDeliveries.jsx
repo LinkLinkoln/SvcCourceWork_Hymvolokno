@@ -1,488 +1,144 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  fetchCurrentDeliveries,
-  fetchSortedDeliveries,
-  updateOrderStatus,
-} from "../../../../api/deliveryApi/deliveryApi";
-import {
   Box,
+  Button,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Button,
   Typography,
-  Collapse,
   IconButton,
+  Modal,
+  Fade,
   Snackbar,
-  Alert,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Select,
-  MenuItem,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { fetchAllEvents, deleteEvent } from "../../../../api/eventApi/eventApi";
 
-const CurrentDeliveries = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [openRows, setOpenRows] = useState({});
-  const [sortConfig, setSortConfig] = useState({
-    sortBy: "Price",
-    order: "ASC",
-  });
-  const userId = localStorage.getItem("id");
-
-  //Управление снакбаром
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+const CourierEventManager = () => {
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
-  //Управление модальным окном и статусом
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState("Pending");
-
-  const fetchDeliveries = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const id = Number(userId);
-    const result = await fetchCurrentDeliveries(id);
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setOrders(result.data);
+  const fetchEvents = useCallback(async () => {
+    try {
+      const allEvents = await fetchAllEvents('client'); 
+      console.log(allEvents);
+      setEvents(allEvents); 
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      setSnackbarMessage("Error fetching events.");
+      setSnackbarOpen(true);
     }
-    setLoading(false);
-  }, [userId]);
-
-  const fetchSorted = async (sortBy, order) => {
-    setLoading(true);
-    setError(null);
-    const result = await fetchSortedDeliveries(userId, sortBy, order);
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setOrders(result.data);
-      setSortConfig({ sortBy, order });
-    }
-    setLoading(false);
-  };
-
+  }, []);
+  
   useEffect(() => {
-    fetchDeliveries();
-  }, [fetchDeliveries]);
+    fetchEvents();
+  }, [fetchEvents]);
 
-  const handleToggleRow = (id) => {
-    setOpenRows((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleDialogOpen = (orderId) => {
-    setSelectedOrderId(orderId);
-    setOpenDialog(true);
-  };
-
-  const handleDialogClose = () => {
-    setOpenDialog(false);
-    setSelectedOrderId(null);
-    setSelectedStatus("Pending");
-  };
-
-  const handleStatusChange = async () => {
-    const result = await updateOrderStatus(selectedOrderId, selectedStatus);
-    if (result.error) {
-      setSnackbarMessage(result.error);
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
-    } else {
-      setSnackbarMessage("Order status has been updated.");
-      setSnackbarSeverity("success");
-      setOpenSnackbar(true);
-      await fetchDeliveries();
-      handleDialogClose();
+  // Удаление события
+  const handleDelete = async () => {
+    try {
+      await deleteEvent(selectedEvent.id);
+      setEvents((prev) => prev.filter((event) => event.id !== selectedEvent.id));
+      setSnackbarMessage("Event deleted successfully.");
+      setSnackbarOpen(true);
+      closeConfirmDelete();
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      setSnackbarMessage(
+        error.response?.data?.message || "Error deleting event."
+      );
+      setSnackbarOpen(true);
     }
   };
 
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
+  // Открытие и закрытие окна подтверждения удаления
+  const openConfirmDelete = (event) => setSelectedEvent(event) || setConfirmDeleteOpen(true);
+  const closeConfirmDelete = () => setSelectedEvent(null) || setConfirmDeleteOpen(false);
 
-  const handleSortByDate = () => {
-    const newOrder =
-      sortConfig.sortBy === "Date" && sortConfig.order === "ASC"
-        ? "DESC"
-        : "ASC";
-    fetchSorted("Date", newOrder);
-  };
-
-  const handleSortByPrice = () => {
-    const newOrder =
-      sortConfig.sortBy === "Price" && sortConfig.order === "ASC"
-        ? "DESC"
-        : "ASC";
-    fetchSorted("Price", newOrder);
-  };
-
-  if (loading) {
-    return (
-      <Typography
-        variant="h6"
-        sx={{ display: "flex", justifyContent: "center" }}
-      >
-        Loading...
-      </Typography>
-    );
-  }
-
-  if (error) {
-    return (
-      <Typography
-        variant="h6"
-        color="error"
-        sx={{ display: "flex", justifyContent: "center" }}
-      >
-        {error}
-      </Typography>
-    );
-  }
+  // Закрытие уведомления
+  const closeSnackbar = () => setSnackbarOpen(false);
 
   return (
-    <div>
-      {orders.length > 0 ? (
-        <>
-          <div
-            style={{
-              marginTop: "20px",
-              marginBottom: "20px",
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "10px",
-            }}
-          >
-            <Button
-              onClick={handleSortByDate}
-              variant={sortConfig.sortBy === "Date" ? "contained" : "outlined"}
-              sx={{
-                borderColor: "rgba(128, 96, 68, 1)",
-                backgroundColor:
-                  sortConfig.sortBy === "Date"
-                    ? "rgba(128, 96, 68, 1)"
-                    : "transparent",
-                color:
-                  sortConfig.sortBy === "Date"
-                    ? "white"
-                    : "rgba(128, 96, 68, 1)",
-                "@media(max-width:400px)": { fontSize: "10px" },
-              }}
-            >
-              Sort by Date{" "}
-              {sortConfig.sortBy === "Date"
-                ? sortConfig.order === "ASC"
-                  ? "↑"
-                  : "↓"
-                : ""}
-            </Button>
-            <Button
-              onClick={handleSortByPrice}
-              variant={sortConfig.sortBy === "Price" ? "contained" : "outlined"}
-              sx={{
-                borderColor: "rgba(128, 96, 68, 1)",
-                backgroundColor:
-                  sortConfig.sortBy === "Price"
-                    ? "rgba(128, 96, 68, 1)"
-                    : "transparent",
-                color:
-                  sortConfig.sortBy === "Price"
-                    ? "white"
-                    : "rgba(128, 96, 68, 1)",
-                "@media(max-width:400px)": { fontSize: "10px" },
-              }}
-            >
-              Sort by Amount{" "}
-              {sortConfig.sortBy === "Price"
-                ? sortConfig.order === "ASC"
-                  ? "↑"
-                  : "↓"
-                : ""}
-            </Button>
-          </div>
-          <Box
-            sx={{
-              width: "100%",
-              overflowX: "auto",
-              margin: "auto",
-              marginTop: "20px",
-              padding: "0",
-            }}
-          >
-            <TableContainer
-              sx={{
-                width: "100%",
-                margin: "auto",
-                marginTop: "20px",
-              }}
-            >
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        fontSize: "1rem",
-                        "@media(max-width:540px)": {
-                          paddingRight: "3px",
-                        },
-                        "@media(max-width:328px)": {
-                          paddingRight: "1px",
-                        },
-                      }}
-                    >
-                      Address
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        fontSize: "1rem",
-                        "@media(max-width:540px)": {
-                          paddingRight: "3px",
-                        },
-                        "@media(max-width:328px)": {
-                          paddingRight: "1px",
-                        },
-                      }}
-                    >
-                      Status
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        fontSize: "1rem",
-                        "@media(max-width:540px)": {
-                          paddingRight: "3px",
-                        },
-                        "@media(max-width:328px)": {
-                          paddingRight: "1px",
-                        },
-                      }}
-                    >
-                      Amount
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        fontSize: "1rem",
-                        "@media(max-width:540px)": {
-                          paddingRight: "3px",
-                        },
-                        "@media(max-width:328px)": {
-                          paddingRight: "1px",
-                        },
-                      }}
-                    >
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {orders.map((order) => (
-                    <React.Fragment key={order.id}>
-                      <TableRow>
-                        <TableCell
-                          sx={{
-                            "@media(max-width:540px)": {
-                              padding: "0px",
-                              textAlign: "center",
-                            },
-                          }}
-                        >
-                          <IconButton onClick={() => handleToggleRow(order.id)}>
-                            <ExpandMoreIcon
-                              className={openRows[order.id] ? "rotated" : ""}
-                              sx={{
-                                transition: "transform 0.3s",
-                                transform: openRows[order.id]
-                                  ? "rotate(180deg)"
-                                  : "rotate(0deg)",
-                              }}
-                            />
-                          </IconButton>
-                          {order.deliveryAddress}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            "@media(max-width:540px)": {
-                              paddingRight: "3px",
-                            },
-                            "@media(max-width:328px)": {
-                              paddingRight: "1px",
-                            },
-                          }}
-                        >
-                          {order.status}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            "@media(max-width:540px)": {
-                              paddingRight: "3px",
-                            },
-                            "@media(max-width:328px)": {
-                              paddingRight: "1px",
-                            },
-                          }}
-                        >
-                          {order.totalAmount}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            "@media(max-width:540px)": {
-                              paddingRight: "3px",
-                            },
-                            "@media(max-width:328px)": {
-                              paddingRight: "1px",
-                            },
-                          }}
-                        >
-                          <Button
-                            variant="contained"
-                            onClick={() => handleDialogOpen(order.id)}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: "bold",
-                              backgroundColor: "rgba(128, 96, 68, 1)",
-                              "@media(max-width:540px)": {
-                                fontSize: "10px",
-                              },
-                            }}
-                          >
-                            Change Status
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell
-                          colSpan={4}
-                          style={{ paddingBottom: 0, paddingTop: 0 }}
-                        >
-                          <Collapse
-                            in={openRows[order.id]}
-                            timeout="auto"
-                            unmountOnExit
-                          >
-                            <div
-                              style={{
-                                padding: "16px",
-                                backgroundColor: "rgba(128, 96, 68, 0.4)",
-                                borderRadius: "8px",
-                              }}
-                            >
-                              <Typography
-                                variant="h6"
-                                sx={{ fontWeight: "bold" }}
-                              >
-                                Additional Information
-                              </Typography>
-                              <Typography>
-                                Delivery Date:{" "}
-                                {new Date(order.deliveryDate).toLocaleString()}
-                              </Typography>
-                              <Typography>
-                                Client Name: {order.clientFullName}
-                              </Typography>
-                              <Typography>Ordered Dishes:</Typography>
-                              <ul>
-                                {order.orderedDishes.map((dish, index) => (
-                                  <li key={index}>
-                                    {dish.dishName} - Quantity: {dish.quantity},
-                                    Price: {dish.totalPrice}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </Collapse>
-                        </TableCell>
-                      </TableRow>
-                    </React.Fragment>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+    <Box sx={{ color: "rgba(128, 96, 68, 1)", marginBottom: "40px" }}>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell align="center">Date</TableCell>
+              <TableCell align="center">Address</TableCell>
+              <TableCell align="center">Message</TableCell>
+              <TableCell align="center">Phone</TableCell> {/* Новый столбец для телефона */}
+              <TableCell align="center">Email</TableCell> {/* Новый столбец для email */}
+              <TableCell align="center">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {events.map((event) => (
+              <TableRow key={event.id}>
+                <TableCell align="center">
+                  {new Date(event.date).toLocaleDateString()}
+                </TableCell>
+                <TableCell align="center">{event.address}</TableCell>
+                <TableCell align="center">{event.message}</TableCell>
+                <TableCell align="center">{event.phone}</TableCell> {/* Отображаем телефон */}
+                <TableCell align="center">{event.Employee?.email}</TableCell> {/* Отображаем email */}
+                <TableCell align="center">
+                  <IconButton onClick={() => openConfirmDelete(event)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Модальное окно подтверждения удаления */}
+      <Modal open={confirmDeleteOpen} onClose={closeConfirmDelete}>
+        <Fade in={confirmDeleteOpen}>
+          <Box sx={modalBoxStyles}>
+            <Typography variant="h6" align="center">
+              Are you sure you want to delete this event?
+            </Typography>
+            <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
+              <Button onClick={closeConfirmDelete} variant="outlined">
+                Cancel
+              </Button>
+              <Button onClick={handleDelete} variant="contained" color="error">
+                Delete
+              </Button>
+            </Box>
           </Box>
-        </>
-      ) : (
-        <Typography
-          variant="h6"
-          sx={{
-            textAlign: "center",
-            margin: "70px auto",
-            color: "rgba(128, 96, 68, 1)",
-            fontSize: "35px",
-          }}
-        >
-          No current deliveries
-        </Typography>
-      )}
-      <a
-        href="/courier"
-        style={{
-          display: "block",
-          textAlign: "center",
-          marginTop: "40px",
-          marginBottom: "40px",
-          textDecoration: "none",
-          fontSize: "24px",
-          color: "rgba(128, 96, 68, 1)",
-        }}
-      >
-        Return back
-      </a>
+        </Fade>
+      </Modal>
+
+      {/* Уведомление */}
       <Snackbar
-        open={openSnackbar}
+        open={snackbarOpen}
+        onClose={closeSnackbar}
+        message={snackbarMessage}
         autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        sx={{
-          backgroundColor: "rgba(128, 96, 68, 1)",
-          color: "white",
-        }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-      <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Change Order Status</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to change the status to{" "}
-            <strong>{selectedStatus}</strong>?
-          </DialogContentText>
-          <Select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            fullWidth
-          >
-            <MenuItem value="Pending">Pending</MenuItem>
-            <MenuItem value="On the Way">On the Way</MenuItem>
-            <MenuItem value="Delivered">Delivered</MenuItem>
-            <MenuItem value="Delayed">Delayed</MenuItem>
-          </Select>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} color="rgba(128, 96, 68, 1)">
-            Cancel
-          </Button>
-          <Button onClick={handleStatusChange} color="rgba(128, 96, 68, 1)">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+      />
+    </Box>
   );
 };
 
-export default CurrentDeliveries;
+// Стили для модального окна
+const modalBoxStyles = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 4,
+};
+
+export default CourierEventManager;

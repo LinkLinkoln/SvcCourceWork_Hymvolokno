@@ -30,7 +30,7 @@ const ClientMain = () => {
             <img alt="icon" src={icon2}></img>
           </a>
           <div className="blockText">
-            <a href="/cart">СПИСОК УСЛУГ</a>
+            <a href="/cart">СПИСОК ПРИБОРОВ</a>
             <p>Рассчитать параметры для ваших измерений (в один клик)</p>
           </div>
         </div>
@@ -39,7 +39,7 @@ const ClientMain = () => {
             <img alt="icon" src={icon3}></img>
           </a>
           <div className="blockText">
-            <a href="/client/orderHistory">ИСТОРИЯ ИЗМЕРЕНИЙ</a>
+            <a href="/client/orderHistory">ИСТОРИЯ ПРОВЕРОК</a>
             <p>Просмотр истории измерений и параметров</p>
           </div>
         </div>
@@ -48,7 +48,7 @@ const ClientMain = () => {
             <img alt="icon" src={icon3}></img>
           </a>
           <div className="blockText">
-            <a href="/client/current">ТЕКУЩИЕ ИЗМЕРЕНИЯ</a>
+            <a href="/client/current">НОРМАТИВНЫЕ ДОКУМЕНТЫ</a>
             <p>Смотрите текущие процессы измерений</p>
           </div>
         </div>
