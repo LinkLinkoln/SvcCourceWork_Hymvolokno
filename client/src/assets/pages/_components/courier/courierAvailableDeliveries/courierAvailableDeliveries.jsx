@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, TextField, Avatar, Card, CardContent, CardActions, Typography, Box, Grid } from "@mui/material";
 import { updateDevice, uploadDevicePhoto, deleteDevice, getDevices, getDivecePhotoUrl, addDevice } from "../../../../api/deviceApi/deviceApi";
+import Pagination from "@mui/material/Pagination";
 
 const DeviceList = () => {
   const [devices, setDevices] = useState([]);
-  const [status, setStatus] = useState(""); 
-  const [selectedDevice, setSelectedDevice] = useState(null); 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [status, setStatus] = useState("");
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false); 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [photo, setPhoto] = useState(null);
   
   const [newDevice, setNewDevice] = useState({
@@ -21,6 +22,13 @@ const DeviceList = () => {
     devicePhoto: null,
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const generateSerialNumber = () => {
+    return `SN-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+  };
+
   useEffect(() => {
     const fetchDevices = async () => {
       try {
@@ -32,6 +40,15 @@ const DeviceList = () => {
     };
     fetchDevices();
   }, [status]);
+
+    const handlePageChange = (event, page) => {
+    setCurrentPage(page);
+  };
+
+  const paginatedDevices = devices.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleDelete = async (id) => {
     try {
@@ -110,11 +127,15 @@ const DeviceList = () => {
       const formData = new FormData();
       formData.append("name", newDevice.name);
       formData.append("type", newDevice.type);
-      formData.append("serialNumber", newDevice.serialNumber);
+  
+      // Генерация серийного номера, если он не указан
+      const serialNumber = newDevice.serialNumber || generateSerialNumber();
+      formData.append("serialNumber", serialNumber);
+  
       formData.append("commissioningDate", newDevice.commissioningDate);
       formData.append("calibrationInterval", newDevice.calibrationInterval);
       formData.append("currentStatus", newDevice.currentStatus);
-
+  
       if (photo) {
         const photoData = new FormData();
         photoData.append("devicePhoto", photo);
@@ -122,10 +143,10 @@ const DeviceList = () => {
         const fileName = photoResponse.filePath.split('/').pop();
         formData.append("devicePhoto", fileName);
       }
-
+  
       const addedDevice = await addDevice(formData);
       setDevices([...devices, addedDevice]);
-
+  
       handleCloseAddModal();
     } catch (error) {
       console.error("Error adding device:", error);
@@ -154,43 +175,81 @@ const DeviceList = () => {
 
   return (
     <div style={{ padding: "20px", backgroundColor: "#f5f5f5" }}>
-      <Typography variant="h4" gutterBottom align="center">Devices List</Typography>
-      <Button 
-        onClick={handleOpenAddModal} 
-        color="primary" 
-        variant="contained" 
+      <Typography variant="h4" gutterBottom align="center">
+        Devices List
+      </Typography>
+      <Button
+        onClick={handleOpenAddModal}
+        color="primary"
+        variant="contained"
         style={{ marginBottom: "20px", display: "block", marginLeft: "auto", marginRight: "auto" }}
       >
         Add New Device
       </Button>
-      
+
       <Grid container spacing={3} justifyContent="center">
-        {devices.map((device) => (
+        {paginatedDevices.map((device) => (
           <Grid item xs={12} sm={6} md={4} key={device.id}>
             <Card>
               <CardContent style={{ textAlign: "center" }}>
-                <Avatar 
-                  alt={device.name} 
-                  src={getDivecePhotoUrl(device.devicePhoto)} 
-                  sx={{ width: 100, height: 100, margin: "0 auto" }} 
+                <Avatar
+                  alt={device.name}
+                  src={getDivecePhotoUrl(device.devicePhoto)}
+                  sx={{ width: 100, height: 100, margin: "0 auto" }}
                 />
-                <Typography variant="h6" component="h3">{device.name}</Typography>
-                <Typography variant="body2" color="textSecondary">{device.position}</Typography>
-                <Typography variant="body2" color="textSecondary">{device.status}</Typography>
+                <Typography variant="h6" component="h3">
+                  {device.name}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {device.position}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {device.status}
+                </Typography>
               </CardContent>
               <CardActions style={{ justifyContent: "center" }}>
-                <Button onClick={() => handleOpenModal(device)} color="primary">Details</Button>
-                <Button onClick={() => handleDelete(device.id)} color="secondary">Delete</Button>
+                <Button
+                  onClick={() => handleOpenModal(device)}
+                  color="primary"
+                >
+                  Details
+                </Button>
+                <Button
+                  onClick={() => handleDelete(device.id)}
+                  color="secondary"
+                >
+                  Delete
+                </Button>
               </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
 
+      {/* Пагинация */}
+      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+        <Pagination
+          count={Math.ceil(devices.length / itemsPerPage)}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </div>
+
       {/* Add Device Modal */}
       <Modal open={isAddModalOpen} onClose={handleCloseAddModal}>
-        <div style={{ padding: "30px", backgroundColor: "#fff", borderRadius: "8px", width: "400px", margin: "100px auto" }}>
-          <Typography variant="h6" gutterBottom>Add New Device</Typography>
+        <div
+          style={{
+            padding: "30px",
+            backgroundColor: "#fff",
+            borderRadius: "8px",
+            width: "400px",
+            margin: "100px auto",
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Add New Device
+          </Typography>
           <form>
             <TextField
               label="Device Name"
@@ -205,14 +264,6 @@ const DeviceList = () => {
               value={newDevice.type}
               onChange={handleNewDeviceChange}
               name="type"
-              fullWidth
-              style={{ marginBottom: "15px" }}
-            />
-            <TextField
-              label="Serial Number"
-              value={newDevice.serialNumber}
-              onChange={handleNewDeviceChange}
-              name="serialNumber"
               fullWidth
               style={{ marginBottom: "15px" }}
             />
@@ -245,17 +296,31 @@ const DeviceList = () => {
             />
             <div style={{ marginBottom: "15px" }}>
               <label>Device Photo</label>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handlePhotoChange} 
-                style={{ width: "100%" }} 
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                style={{ width: "100%" }}
               />
             </div>
 
-            <div style={{ marginTop: "20px", display: "flex", justifyContent: "space-between" }}>
-              <Button onClick={handleCloseAddModal} color="secondary">Close</Button>
-              <Button onClick={handleAddDevice} color="primary" variant="contained">Add Device</Button>
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <Button onClick={handleCloseAddModal} color="secondary">
+                Close
+              </Button>
+              <Button
+                onClick={handleAddDevice}
+                color="primary"
+                variant="contained"
+              >
+                Add Device
+              </Button>
             </div>
           </form>
         </div>
@@ -263,12 +328,26 @@ const DeviceList = () => {
 
       {/* Edit Device Modal */}
       <Modal open={isModalOpen} onClose={handleCloseModal}>
-        <div style={{ padding: "30px", backgroundColor: "#fff", borderRadius: "8px", width: "400px", margin: "100px auto" }}>
+        <div
+          style={{
+            padding: "30px",
+            backgroundColor: "#fff",
+            borderRadius: "8px",
+            width: "400px",
+            margin: "100px auto",
+          }}
+        >
           {selectedDevice && (
             <>
-              <Typography variant="h6" gutterBottom>Device Details</Typography>
+              <Typography variant="h6" gutterBottom>
+                Device Details
+              </Typography>
               <div style={{ textAlign: "center", marginBottom: "20px" }}>
-                <Avatar alt={selectedDevice.name} src={getDivecePhotoUrl(selectedDevice.devicePhoto)} sx={{ width: 100, height: 100, margin: "0 auto" }} />
+                <Avatar
+                  alt={selectedDevice.name}
+                  src={getDivecePhotoUrl(selectedDevice.devicePhoto)}
+                  sx={{ width: 100, height: 100, margin: "0 auto" }}
+                />
               </div>
               <form>
                 <TextField
@@ -298,17 +377,23 @@ const DeviceList = () => {
                 />
                 <div style={{ marginBottom: "15px" }}>
                   <label>Device Photo</label>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handlePhotoChange} 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
                     disabled={!isEditing}
-                    style={{ width: "100%" }} 
+                    style={{ width: "100%" }}
                   />
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <Button onClick={handleCloseModal} color="secondary">Close</Button>
-                  <Button onClick={isEditing ? handleSaveChanges : () => setIsEditing(true)} color="primary" variant="contained">
+                  <Button onClick={handleCloseModal} color="secondary">
+                    Close
+                  </Button>
+                  <Button
+                    onClick={isEditing ? handleSaveChanges : () => setIsEditing(true)}
+                    color="primary"
+                    variant="contained"
+                  >
                     {isEditing ? "Save Changes" : "Edit"}
                   </Button>
                 </div>
