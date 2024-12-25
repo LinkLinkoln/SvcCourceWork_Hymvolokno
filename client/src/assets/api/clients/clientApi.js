@@ -1,16 +1,5 @@
 import axiosInstance from "../apiConfig";
 
-export const fetchClientById = async (clientId) => {
-  try {
-    const response = await axiosInstance.get(`/clients/${clientId}`);
-    return {
-      data: response.data,
-    };
-  } catch (error) {
-    return handleError(error);
-  }
-};
-
 const handleError = (error) => {
   const message =
     error.response?.data?.error || "An unexpected error occurred.";
@@ -28,11 +17,21 @@ class ClientApi {
       return this.handleError(error);
     }
   }
+  async fetchClientById(id) {
+    try {
+      const response = await axiosInstance.get(`/employees/${id}`);
+      return {
+        data: response.data,
+      };
+    } catch (error) {
+      return handleError(error);
+    }
+  };
 
-  async updateClient(clientId, clientData) {
+  async updateClient(id, clientData) {
     try {
       const response = await axiosInstance.put(
-        `/clients/${clientId}`,
+        `/employees/${id}`,
         clientData
       );
       return {

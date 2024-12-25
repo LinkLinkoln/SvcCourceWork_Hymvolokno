@@ -4,14 +4,13 @@ const {
   addRegulatoryDocument,
   getAllRegulatoryDocuments,
   searchRegulatoryDocumentByName,
-  markCalibrationAsCompleted,
 } = require("../controllers/regulatoryDocumentController");
 
 // Добавление документа
-router.post("/regulatory-documents", addRegulatoryDocument);
+router.post("/", addRegulatoryDocument);
 // Получение всех документов
-router.get("/regulatory-documents", getAllRegulatoryDocuments);
+router.get("/", getAllRegulatoryDocuments);
 // Поиск документа по названию
-router.get("/regulatory-documents/search", searchRegulatoryDocumentByName);
+router.get("/search", searchRegulatoryDocumentByName);
 
 module.exports = router;

@@ -7,13 +7,26 @@ import icon4 from "../../../img/icons/review.png";
 import LogoutModal from "../modal/exitAccountModal/logoutModal";
 import Cookies from "js-cookie";
 import { Button } from "@mui/material"; 
+import EditClientModal from "../../_components/modal/clientModal/clientModal";
 
 const ClientMain = () => {
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [openEditClientModal, setOpenEditClientModal] = useState(false);
+  const userid = localStorage.getItem("id");
 
   const handleToggleLogoutModal = () => {
     setOpenLogoutModal((prev) => !prev);
   };
+
+  const handleToggleModal = () => {
+    setOpenModal(!openModal);
+  };
+
+  const handleToggleEditClientModal = () => {
+    setOpenEditClientModal((prev) => !prev);
+  };
+
 
   const handleLogOut = () => {
     localStorage.removeItem("id");
@@ -35,23 +48,15 @@ const ClientMain = () => {
           </div>
         </div>
         <div className="block">
-          <a href="/client/orderHistory">
+          <a onClick={handleToggleEditClientModal}>
             <img alt="icon" src={icon3}></img>
           </a>
           <div className="blockText">
-            <a href="/client/orderHistory">ИСТОРИЯ ПРОВЕРОК</a>
-            <p>Просмотр истории измерений и параметров</p>
+            <a onClick={handleToggleEditClientModal} >ИНФОРМАЦИЯ</a>
+            <p>Просмотр информации о пользователе</p>
           </div>
         </div>
-        <div className="block">
-          <a href="/client/current">
-            <img alt="icon" src={icon3}></img>
-          </a>
-          <div className="blockText">
-            <a href="/client/current">НОРМАТИВНЫЕ ДОКУМЕНТЫ</a>
-            <p>Смотрите текущие процессы измерений</p>
-          </div>
-        </div>
+
         <div className="block">
           <button>
             <a href="/client/eventHistory">
@@ -75,6 +80,7 @@ const ClientMain = () => {
           </div>
         </div>
       </div>
+        <EditClientModal clientId={userid} open={openEditClientModal} onClose={handleToggleEditClientModal} />
 
       {}
       <Button

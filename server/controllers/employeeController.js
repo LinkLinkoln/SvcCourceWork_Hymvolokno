@@ -111,6 +111,27 @@ const getEmployees = async (req, res) => {
   }
 };
 
+const getEmployeeById = async (req, res) => {
+  try {
+    const { id } = req.params; // Получаем ID из параметров запроса
+
+    // Ищем сотрудника по ID
+    const employee = await Employee.findByPk(id);
+
+    // Если сотрудник не найден, возвращаем 404
+    if (!employee) {
+      return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    // Если сотрудник найден, возвращаем его данные
+    return res.status(200).json(employee);
+  } catch (error) {
+    // В случае ошибки возвращаем 500 и сообщение об ошибке
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while fetching employee data' });
+  }
+};
+
 //Редактирование сотрудника
 const updateEmployee = async (req, res) => {
   try {
@@ -276,4 +297,5 @@ module.exports = {
   updateEmployee,
   registerEmployee,
   loginEmployee,
+  getEmployeeById
 };

@@ -7,6 +7,7 @@ const {
   updateEmployee,
   registerEmployee,
   loginEmployee,
+  getEmployeeById
 } = require("../controllers/employeeController");
 
 //Добавление нового сотрудника
@@ -27,6 +28,7 @@ router.post("/register", registerEmployee);
 //Aвторизация сотрудника
 router.post("/login", loginEmployee);
 
+router.get('/:id', getEmployeeById);
 
 
 

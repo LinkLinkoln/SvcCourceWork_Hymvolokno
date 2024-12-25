@@ -80,3 +80,18 @@ export const getDivecePhotoUrl = (devicePhoto) => {
     return `http://localhost:5000/api/static/${devicePhoto}`;
   };
 
+
+export const downloadDeviceHistoryReport = async () => {
+  try {
+    const response = await axiosInstance.get(
+      '/devices/Downl/Daun',
+      {
+        responseType: "blob",
+      }
+    );
+    return { data: response.data };
+  } catch (error) {
+    return { error: "Error downloading file." };
+  }
+};
+  

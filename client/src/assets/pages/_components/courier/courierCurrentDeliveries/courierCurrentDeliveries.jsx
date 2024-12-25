@@ -23,19 +23,20 @@ const CourierEventManager = () => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc"); // State to manage the sorting order (ascending or descending)
 
   const fetchEvents = useCallback(async () => {
     try {
-      const allEvents = await fetchAllEvents('client'); 
+      const allEvents = await fetchAllEvents('client');
       console.log(allEvents);
-      setEvents(allEvents); 
+      setEvents(allEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
       setSnackbarMessage("Error fetching events.");
       setSnackbarOpen(true);
     }
   }, []);
-  
+
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
@@ -50,9 +51,7 @@ const CourierEventManager = () => {
       closeConfirmDelete();
     } catch (error) {
       console.error("Error deleting event:", error);
-      setSnackbarMessage(
-        error.response?.data?.message || "Error deleting event."
-      );
+      setSnackbarMessage(error.response?.data?.message || "Error deleting event.");
       setSnackbarOpen(true);
     }
   };
@@ -64,30 +63,47 @@ const CourierEventManager = () => {
   // Закрытие уведомления
   const closeSnackbar = () => setSnackbarOpen(false);
 
+  // Сортировка событий по дате
+  const handleSortByDate = () => {
+    const sortedEvents = [...events].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+
+      if (sortOrder === "asc") {
+        return dateA - dateB; // Ascending order
+      } else {
+        return dateB - dateA; // Descending order
+      }
+    });
+
+    setEvents(sortedEvents);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle sort order
+  };
+
   return (
     <Box sx={{ color: "rgba(128, 96, 68, 1)", marginBottom: "40px" }}>
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell align="center">Date</TableCell>
+              <TableCell align="center" onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+                Date {sortOrder === "asc" ? "↓" : "↑"}
+              </TableCell>
               <TableCell align="center">Address</TableCell>
               <TableCell align="center">Message</TableCell>
-              <TableCell align="center">Phone</TableCell> {/* Новый столбец для телефона */}
-              <TableCell align="center">Email</TableCell> {/* Новый столбец для email */}
+              <TableCell align="center">Phone</TableCell>
+              <TableCell align="center">Email</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {events.map((event) => (
               <TableRow key={event.id}>
-                <TableCell align="center">
-                  {new Date(event.date).toLocaleDateString()}
-                </TableCell>
+                <TableCell align="center">{new Date(event.date).toLocaleDateString()}</TableCell>
                 <TableCell align="center">{event.address}</TableCell>
                 <TableCell align="center">{event.message}</TableCell>
-                <TableCell align="center">{event.phone}</TableCell> {/* Отображаем телефон */}
-                <TableCell align="center">{event.Employee?.email}</TableCell> {/* Отображаем email */}
+                <TableCell align="center">{event.phone}</TableCell>
+                <TableCell align="center">{event.Employee?.email}</TableCell>
                 <TableCell align="center">
                   <IconButton onClick={() => openConfirmDelete(event)}>
                     <DeleteIcon />

@@ -14,6 +14,7 @@ const repairRequestRoutes = require("./routes/repairRequestRoutes");
 const eventRoutes = require("./routes/eventRoutes.js")
 const UserSeed = require("./seed/UserSeed.js")
 const DeviceSeed = require("./seed/DeviceSeed.js")
+const DocumentSeed = require("./seed/DocumentSeed.js")
 require("dotenv").config();
 
 // Middleware для обработки JSON
@@ -22,6 +23,7 @@ app.use(fileUpload());
 
 app.use(express.json());
 app.use("/api/static", express.static(path.join(__dirname, "static")));
+app.use("/api/files", express.static(path.join(__dirname, "files")));
 
 app.use(
   cors({
@@ -67,6 +69,7 @@ const start = async()=> {
             });
   await UserSeed()   
   await DeviceSeed()
+  await DocumentSeed()
   //await seedTechnican()  
 } 
 

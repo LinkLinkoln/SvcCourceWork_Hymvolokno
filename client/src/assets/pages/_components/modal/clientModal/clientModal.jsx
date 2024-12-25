@@ -17,9 +17,10 @@ const EditClientModal = ({ open, onClose }) => {
   const [fathername, setFathername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [position, setPosition] = useState(""); // Новый параметр
+  const [role, setRole] = useState(""); // Новый параметр
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -29,15 +30,16 @@ const EditClientModal = ({ open, onClose }) => {
     const fetchClientData = async () => {
       if (!open) return;
 
-      const { data } = await ClientApi.fetchClient(clientId);
+      const { data } = await ClientApi.fetchClientById(clientId);
       if (data) {
         setClientData(data);
-        setLastname(data.lastname);
+        setLastname(data.lastName);
         setName(data.name);
-        setFathername(data.fathername || "");
+        setFathername(data.fatherName || "");
         setEmail(data.email);
         setPhone(data.phone);
-        setAddress(data.address || "");
+        setPosition(data.position || ""); // Получаем значение position
+        setRole(data.role || ""); // Получаем значение role
       }
     };
 
@@ -98,7 +100,8 @@ const EditClientModal = ({ open, onClose }) => {
       fathername,
       email,
       phone,
-      address,
+      position, // Новое поле
+      role, // Новое поле
       ...(password && { password }),
     });
 
@@ -117,8 +120,9 @@ const EditClientModal = ({ open, onClose }) => {
       setLastname(clientData.lastname);
       setName(clientData.name);
       setFathername(clientData.fathername || "");
-      setAddress(clientData.address || "");
       setPhone(clientData.phone);
+      setPosition(clientData.position || ""); // Сброс значения position
+      setRole(clientData.role || ""); // Сброс значения role
       setPassword("");
       setConfirmPassword("");
     }
@@ -198,14 +202,6 @@ const EditClientModal = ({ open, onClose }) => {
           margin="normal"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          sx={{ marginBottom: "10px" }}
-        />
-        <TextField
-          label="Адрес"
-          fullWidth
-          margin="normal"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
           sx={{ marginBottom: "10px" }}
         />
         <TextField

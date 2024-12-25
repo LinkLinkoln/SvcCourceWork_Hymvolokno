@@ -16,7 +16,7 @@ async function seedDevices() {
       type: 'Sensor',
       serialNumber: 'TS-1245',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 12, // Интервал в месяцах
+      calibrationInterval: 8, // Интервал в месяцах
       currentStatus: 'Operational',
     },
     {
@@ -24,7 +24,7 @@ async function seedDevices() {
       type: 'Sensor',
       serialNumber: 'TS-1235',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 12, // Интервал в месяцах
+      calibrationInterval: 4, // Интервал в месяцах
       currentStatus: 'Operational',
     },
     {

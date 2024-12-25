@@ -39,6 +39,7 @@ const addRegulatoryDocument = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    console.error(error.message);
     res.status(500).json({
       message: "Ошибка при добавлении документа",
       error: error.message,

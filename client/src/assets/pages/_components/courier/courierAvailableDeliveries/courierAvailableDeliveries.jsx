@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, TextField, Avatar, Card, CardContent, CardActions, Typography, Box, Grid } from "@mui/material";
 import { updateDevice, uploadDevicePhoto, deleteDevice, getDevices, getDivecePhotoUrl, addDevice } from "../../../../api/deviceApi/deviceApi";
 import Pagination from "@mui/material/Pagination";
+import { useMediaQuery } from '@mui/material';
 
 const DeviceList = () => {
   const [devices, setDevices] = useState([]);
@@ -11,7 +12,6 @@ const DeviceList = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [photo, setPhoto] = useState(null);
-  
   const [newDevice, setNewDevice] = useState({
     name: "",
     type: "",
@@ -21,7 +21,20 @@ const DeviceList = () => {
     currentStatus: "",
     devicePhoto: null,
   });
+  
+  const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'white',
+    padding: '20px',
+    boxShadow: 24,
+    maxWidth: '500px',
+    width: '100%',
+  };
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -41,11 +54,15 @@ const DeviceList = () => {
     fetchDevices();
   }, [status]);
 
-    const handlePageChange = (event, page) => {
+  const handlePageChange = (event, page) => {
     setCurrentPage(page);
   };
 
-  const paginatedDevices = devices.slice(
+  const filteredDevices = devices.filter(device =>
+    device.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const paginatedDevices = filteredDevices.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -128,7 +145,6 @@ const DeviceList = () => {
       formData.append("name", newDevice.name);
       formData.append("type", newDevice.type);
   
-      // Генерация серийного номера, если он не указан
       const serialNumber = newDevice.serialNumber || generateSerialNumber();
       formData.append("serialNumber", serialNumber);
   
@@ -178,6 +194,16 @@ const DeviceList = () => {
       <Typography variant="h4" gutterBottom align="center">
         Devices List
       </Typography>
+
+      {/* Search Input */}
+      <TextField
+        label="Search by Serial Number"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        fullWidth
+        style={{ marginBottom: "20px" }}
+      />
+
       <Button
         onClick={handleOpenAddModal}
         color="primary"
@@ -226,107 +252,16 @@ const DeviceList = () => {
         ))}
       </Grid>
 
-      {/* Пагинация */}
       <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
         <Pagination
-          count={Math.ceil(devices.length / itemsPerPage)}
+          count={Math.ceil(filteredDevices.length / itemsPerPage)}
           page={currentPage}
           onChange={handlePageChange}
           color="primary"
         />
       </div>
 
-      {/* Add Device Modal */}
-      <Modal open={isAddModalOpen} onClose={handleCloseAddModal}>
-        <div
-          style={{
-            padding: "30px",
-            backgroundColor: "#fff",
-            borderRadius: "8px",
-            width: "400px",
-            margin: "100px auto",
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Add New Device
-          </Typography>
-          <form>
-            <TextField
-              label="Device Name"
-              value={newDevice.name}
-              onChange={handleNewDeviceChange}
-              name="name"
-              fullWidth
-              style={{ marginBottom: "15px" }}
-            />
-            <TextField
-              label="Type"
-              value={newDevice.type}
-              onChange={handleNewDeviceChange}
-              name="type"
-              fullWidth
-              style={{ marginBottom: "15px" }}
-            />
-            <TextField
-              label="Commissioning Date"
-              value={newDevice.commissioningDate}
-              onChange={handleNewDeviceChange}
-              name="commissioningDate"
-              type="date"
-              fullWidth
-              style={{ marginBottom: "15px" }}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              label="Calibration Interval (Days)"
-              value={newDevice.calibrationInterval}
-              onChange={handleNewDeviceChange}
-              name="calibrationInterval"
-              type="number"
-              fullWidth
-              style={{ marginBottom: "15px" }}
-            />
-            <TextField
-              label="Current Status"
-              value={newDevice.currentStatus}
-              onChange={handleNewDeviceChange}
-              name="currentStatus"
-              fullWidth
-              style={{ marginBottom: "15px" }}
-            />
-            <div style={{ marginBottom: "15px" }}>
-              <label>Device Photo</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoChange}
-                style={{ width: "100%" }}
-              />
-            </div>
-
-            <div
-              style={{
-                marginTop: "20px",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <Button onClick={handleCloseAddModal} color="secondary">
-                Close
-              </Button>
-              <Button
-                onClick={handleAddDevice}
-                color="primary"
-                variant="contained"
-              >
-                Add Device
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
-
-      {/* Edit Device Modal */}
+      {/* Modal for Device Details */}
       <Modal open={isModalOpen} onClose={handleCloseModal}>
         <div
           style={{
@@ -401,6 +336,77 @@ const DeviceList = () => {
             </>
           )}
         </div>
+      </Modal>
+
+      {/* Modal for Adding Device */}
+      <Modal open={isAddModalOpen} onClose={handleCloseAddModal}>
+        <Box style={{ ...modalStyle }}>
+          <Typography variant="h5" component="h2" align="center">
+            Add New Device
+          </Typography>
+          <TextField
+            label="Device Name"
+            value={newDevice.name}
+            onChange={handleNewDeviceChange}
+            name="name"
+            fullWidth
+            style={{ marginBottom: "10px" }}
+          />
+          <TextField
+            label="Device Type"
+            value={newDevice.type}
+            onChange={handleNewDeviceChange}
+            name="type"
+            fullWidth
+            style={{ marginBottom: "10px" }}
+          />
+          <TextField
+            label="Serial Number"
+            value={newDevice.serialNumber}
+            onChange={handleNewDeviceChange}
+            name="serialNumber"
+            fullWidth
+            style={{ marginBottom: "10px" }}
+          />
+          <TextField
+            label="Commissioning Date"
+            value={newDevice.commissioningDate}
+            onChange={handleNewDeviceChange}
+            name="commissioningDate"
+            fullWidth
+            style={{ marginBottom: "10px" }}
+          />
+          <TextField
+            label="Calibration Interval"
+            value={newDevice.calibrationInterval}
+            onChange={handleNewDeviceChange}
+            name="calibrationInterval"
+            fullWidth
+            style={{ marginBottom: "10px" }}
+          />
+          <TextField
+            label="Current Status"
+            value={newDevice.currentStatus}
+            onChange={handleNewDeviceChange}
+            name="currentStatus"
+            fullWidth
+            style={{ marginBottom: "10px" }}
+          />
+          <input
+            type="file"
+            onChange={handlePhotoChange}
+            accept="image/*"
+            style={{ marginBottom: "10px" }}
+          />
+          <Button
+            onClick={handleAddDevice}
+            color="primary"
+            variant="contained"
+            style={{ marginTop: "10px" }}
+          >
+            Add Device
+          </Button>
+        </Box>
       </Modal>
     </div>
   );

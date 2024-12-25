@@ -7,6 +7,7 @@ const {
   deleteDevice,
   getDevices,
   getDeviceDetails,
+  downloadDeviceHistory
 } = require("../controllers/deviceController");
 
 // Настройка multer для загрузки файлов
@@ -26,6 +27,7 @@ router.get("/", getDevices);
 // Просмотр подробной информации о приборе
 router.get("/:id", getDeviceDetails);
 
+router.get("/Downl/Daun", downloadDeviceHistory);
 
 
 module.exports = router;

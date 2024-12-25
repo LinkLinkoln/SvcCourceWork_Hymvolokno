@@ -16,7 +16,7 @@ const Header = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openEditCourierModal, setOpenEditCourierModal] = useState(false);
   const [openEditClientModal, setOpenEditClientModal] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false); // Состояние для выезда меню
+  const [menuOpen, setMenuOpen] = useState(false); 
   const navigate = useNavigate();
   const userRole = localStorage.getItem("role");
   const userid = localStorage.getItem("id");

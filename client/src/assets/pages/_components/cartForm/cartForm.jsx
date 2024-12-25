@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getDevices, getDivecePhotoUrl } from "../../../api/deviceApi/deviceApi";
+import { getDevices, getDivecePhotoUrl, downloadDeviceHistoryReport } from "../../../api/deviceApi/deviceApi";
 import {
   Table,
   TableBody,
@@ -19,7 +19,10 @@ import {
   DialogContent,
   DialogTitle,
   Button,
+  TablePagination,
+  TableSortLabel,
 } from "@mui/material";
+import DeviceList from "../courier/courierAvailableDeliveries/courierAvailableDeliveries";
 
 const DeviceTable = () => {
   const [devices, setDevices] = useState([]);
@@ -27,6 +30,10 @@ const DeviceTable = () => {
   const [error, setError] = useState(null);
   const [openCard, setOpenCard] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
+  const [order, setOrder] = useState("asc");
+  const [orderBy, setOrderBy] = useState(null);
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -45,23 +52,74 @@ const DeviceTable = () => {
 
   const handleCardOpen = (device) => {
     setSelectedDevice(device);
-    setOpenCard(true); // Открытие карточки
+    setOpenCard(true);
   };
 
   const handleCardClose = () => {
-    setOpenCard(false); // Закрытие карточки
-    setSelectedDevice(null); // Очистка выбранного устройства
+    setOpenCard(false);
+    setSelectedDevice(null);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
+
+  const sortedDevices = () => {
+    if (!orderBy) return devices;
+    return devices.slice().sort((a, b) => {
+      const aValue = a[orderBy];
+      const bValue = b[orderBy];
+
+      if (order === "asc") {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+  };
+
+  const handleDownloadReport = async () => {
+    const result = await downloadDeviceHistoryReport();
+    const url = window.URL.createObjectURL(new Blob([result.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "device_history.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   if (loading) return <CircularProgress color="primary" />;
   if (error) return <Typography color="error">Error: {error}</Typography>;
 
   return (
-    <Box sx={{ width: "100%", padding: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Box sx={{ width: "100%", padding: 0, marginBottom: 4, marginTop: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontSize: { xs: "1.5rem", sm: "2rem" } }}>
         Device List
       </Typography>
-      <TableContainer component={Paper}>
+
+      {/* Download Button for Device History Report */}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleDownloadReport}
+        sx={{ marginBottom: 2 }}
+      >
+        Download Device History Report
+      </Button>
+
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Table sx={{ minWidth: 650 }} aria-label="device table">
           <TableHead>
             <TableRow>
@@ -69,84 +127,133 @@ const DeviceTable = () => {
               <TableCell>Name</TableCell>
               <TableCell>Type</TableCell>
               <TableCell>Serial Number</TableCell>
-              <TableCell>Commissioning Date</TableCell>
-              <TableCell>Calibration Interval</TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === "commissioningDate"}
+                  direction={orderBy === "commissioningDate" ? order : "asc"}
+                  onClick={() => handleRequestSort("commissioningDate")}
+                >
+                  Commissioning Date
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === "calibrationInterval"}
+                  direction={orderBy === "calibrationInterval" ? order : "asc"}
+                  onClick={() => handleRequestSort("calibrationInterval")}
+                >
+                  Calibration Interval
+                </TableSortLabel>
+              </TableCell>
               <TableCell>Current Status</TableCell>
               <TableCell>Device Photo</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {devices.map((device) => (
-              <TableRow key={device.id}>
-                <TableCell>{device.id}</TableCell>
-                <TableCell>{device.name}</TableCell>
-                <TableCell>{device.type}</TableCell>
-                <TableCell>{device.serialNumber}</TableCell>
-                <TableCell>{device.commissioningDate}</TableCell>
-                <TableCell>{device.calibrationInterval}</TableCell>
-                <TableCell>{device.currentStatus}</TableCell>
-                <TableCell>
-                  <Avatar
-                    alt={device.name}
-                    src={getDivecePhotoUrl(device.devicePhoto)}
-                    onClick={() => handleCardOpen(device)} // Открытие карточки при клике
-                    sx={{ cursor: "pointer" }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+            {sortedDevices()
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((device) => (
+                <TableRow key={device.id}>
+                  <TableCell>{device.id}</TableCell>
+                  <TableCell>{device.name}</TableCell>
+                  <TableCell>{device.type}</TableCell>
+                  <TableCell>{device.serialNumber}</TableCell>
+                  <TableCell>{device.commissioningDate}</TableCell>
+                  <TableCell>{device.calibrationInterval}</TableCell>
+                  <TableCell>{device.currentStatus}</TableCell>
+                  <TableCell>
+                    <Avatar
+                      alt={device.name}
+                      src={getDivecePhotoUrl(device.devicePhoto)}
+                      onClick={() => handleCardOpen(device)}
+                      sx={{ cursor: "pointer" }}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[6, 12, 18]}
+          component="div"
+          count={devices.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </TableContainer>
 
-      {/* Диалоговое окно для отображения карточки с данными */}
       <Dialog open={openCard} onClose={handleCardClose} fullWidth maxWidth="sm">
-  <DialogTitle sx={{ fontWeight: "bold", fontSize: 26, color: "#333", paddingBottom: 2 }}>
-    Device Details
-  </DialogTitle>
-  <DialogContent sx={{ padding: 3 }}>
-    {selectedDevice && (
-      <Card sx={{ display: "flex", flexDirection: "column", alignItems: "center", boxShadow: 3 }}>
-        <CardContent sx={{ textAlign: "center", paddingBottom: 3 }}>
-          <Avatar
-            alt={selectedDevice.name}
-            src={getDivecePhotoUrl(selectedDevice.devicePhoto)}
-            sx={{
-              width: 120,
-              height: 120,
-              mb: 2,
-              border: "4px solid #1976d2", // border around avatar for contrast
-            }}
-          />
-          <Typography variant="h5" sx={{ fontWeight: 600, color: "#333", mb: 1 }}>
-            {selectedDevice.name}
-          </Typography>
-          <Typography variant="body1" sx={{ color: "#555", mb: 1 }}>
-            <strong>Type:</strong> {selectedDevice.type}
-          </Typography>
-          <Typography variant="body1" sx={{ color: "#555", mb: 1 }}>
-            <strong>Serial Number:</strong> {selectedDevice.serialNumber}
-          </Typography>
-          <Typography variant="body1" sx={{ color: "#555", mb: 1 }}>
-            <strong>Commissioning Date:</strong> {selectedDevice.commissioningDate}
-          </Typography>
-          <Typography variant="body1" sx={{ color: "#555", mb: 1 }}>
-            <strong>Calibration Interval:</strong> {selectedDevice.calibrationInterval}
-          </Typography>
-          <Typography variant="body1" sx={{ color: "#555", mb: 3 }}>
-            <strong>Current Status:</strong> {selectedDevice.currentStatus}
-          </Typography>
-        </CardContent>
-      </Card>
-    )}
-  </DialogContent>
-  <DialogActions sx={{ justifyContent: "center", paddingTop: 2 }}>
-    <Button onClick={handleCardClose} color="primary" variant="contained" sx={{ textTransform: "none" }}>
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
-
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            fontSize: { xs: 20, sm: 26 },
+            color: "#333",
+            paddingBottom: 2,
+          }}
+        >
+          Device Details
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            padding: 3,
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: "center",
+            gap: 3,
+          }}
+        >
+          {selectedDevice && (
+            <Card
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: "center",
+                boxShadow: 3,
+                width: "100%",
+              }}
+            >
+              <Avatar
+                alt={selectedDevice.name}
+                src={getDivecePhotoUrl(selectedDevice.devicePhoto)}
+                sx={{
+                  width: { xs: 100, sm: 150 },
+                  height: { xs: 100, sm: 150 },
+                  marginBottom: { xs: 2, sm: 0 },
+                  marginRight: { xs: 0, sm: 3 },
+                  border: "4px solid #1976d2",
+                }}
+              />
+              <CardContent sx={{ textAlign: "left" }}>
+                <Typography variant="h5" sx={{ fontWeight: 600, color: "#333", mb: 1 }}>
+                  {selectedDevice.name}
+                </Typography>
+                <Typography variant="body1" sx={{ color: "#555", mb: 1 }}>
+                  <strong>Тип:</strong> {selectedDevice.type}
+                </Typography>
+                <Typography variant="body1" sx={{ color: "#555", mb: 1 }}>
+                  <strong>Серийный номер:</strong> {selectedDevice.serialNumber}
+                </Typography>
+                <Typography variant="body1" sx={{ color: "#555", mb: 1 }}>
+                  <strong>Дата ввода в эксплуатацию:</strong> {selectedDevice.commissioningDate}
+                </Typography>
+                <Typography variant="body1" sx={{ color: "#555", mb: 1 }}>
+                  <strong>Интервал калибровки:</strong> {selectedDevice.calibrationInterval}
+                </Typography>
+                <Typography variant="body1" sx={{ color: "#555" }}>
+                  <strong>Текущий статус:</strong> {selectedDevice.currentStatus}
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", paddingTop: 2 }}>
+          <Button onClick={handleCardClose} color="primary" variant="contained" sx={{ textTransform: "none" }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
