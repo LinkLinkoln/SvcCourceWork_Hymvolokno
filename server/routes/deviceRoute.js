@@ -21,13 +21,15 @@ router.put("/:id", updateDevice);
 // Удаление прибора
 router.delete("/:id", deleteDevice);
 
-// Отображение списка приборов с фильтрацией по статусу
 router.get("/", getDevices);
 
-// Просмотр подробной информации о приборе
+router.get("/devices/search", getDevices);
+
 router.get("/:id", getDeviceDetails);
 
 router.get("/Downl/Daun", downloadDeviceHistory);
+router.get("/Downl/Daun/excel", downloadDeviceHistory);
+router.get("/Downl/Daun/word", downloadDeviceHistory);
 
 
 module.exports = router;

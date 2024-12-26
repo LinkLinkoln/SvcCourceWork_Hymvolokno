@@ -5,7 +5,6 @@ const fs = require("fs");
 const os = require("os");
 const ExcelJS = require("exceljs");
 
-// Добавление новой записи о поверке
 const addCalibrationHistory = async (req, res) => {
   try {
     const { deviceId, calibrationDate, result, document } = req.body;
@@ -31,7 +30,6 @@ const addCalibrationHistory = async (req, res) => {
   }
 };
 
-//Поиск по истории поверок (по прибору, дате, результату)
 const searchCalibrationHistory = async (req, res) => {
   try {
     const { deviceId, startDate, endDate, result } = req.query;
@@ -58,7 +56,6 @@ const searchCalibrationHistory = async (req, res) => {
   }
 };
 
-//Генерация отчета о поверках за определенный период в Excel
 const generateCalibrationReport = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -69,7 +66,6 @@ const generateCalibrationReport = async (req, res) => {
         .json({ message: "Необходимо указать startDate и endDate" });
     }
 
-    // Получаем данные по истории поверок за указанный период
     const historyRecords = await CalibrationHistory.findAll({
       where: {
         calibrationDate: {

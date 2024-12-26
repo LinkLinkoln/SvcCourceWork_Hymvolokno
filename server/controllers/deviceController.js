@@ -8,7 +8,7 @@ const fs = require("fs");
 const os = require("os");
 const ExcelJS = require("exceljs");
 const path = require("path");
-//Добавление нового прибора
+
 const addDevice = async (req, res) => {
   try {
     const {
@@ -37,7 +37,6 @@ const addDevice = async (req, res) => {
   }
 };
 
-//Редактирование информации о приборе
 const updateDevice = async (req, res) => {
   try {
     const { id } = req.params;
@@ -74,7 +73,6 @@ const updateDevice = async (req, res) => {
   }
 };
 
-//Удаление прибора
 const deleteDevice = async (req, res) => {
   try {
     const { id } = req.params;
@@ -93,7 +91,6 @@ const deleteDevice = async (req, res) => {
   }
 };
 
-//Отображение списка приборов с фильтрацией по статусу
 const getDevices = async (req, res) => {
   try {
     const { status } = req.query; // Получаем параметр статус из запроса
@@ -109,7 +106,6 @@ const getDevices = async (req, res) => {
   }
 };
 
-//Просмотр подробной информации о приборе (включая историю поверок и калибровок)
 const getDeviceDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -173,7 +169,6 @@ const downloadDeviceHistory = async (req, res) => {
     dateCell.font = { size: 12, italic: true };
     dateCell.alignment = { horizontal: "center", vertical: "middle" };
 
-    // Set up columns for the report
     worksheet.columns = [
       { key: "name", width: 30 },
       { key: "type", width: 20 },
@@ -183,7 +178,6 @@ const downloadDeviceHistory = async (req, res) => {
       { key: "currentStatus", width: 25 },
     ];
 
-    // Add headers
     const headers = [
       "Device Name",
       "Type",
@@ -198,19 +192,17 @@ const downloadDeviceHistory = async (req, res) => {
       cell.value = header;
       cell.font = { bold: true };
       cell.alignment = { horizontal: "center", vertical: "middle" };
-      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "8c6e00" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "add8e6" } };
     });
 
-    // Add data rows for each device
     deviceDetails.forEach((device, index) => {
       const row = worksheet.addRow(device);
       row.alignment = { vertical: "middle" };
       if (index % 2 === 0) {
-        row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "8c6e00" } };
+        row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "add8e6" } };
       }
     });
 
-    // Add borders to the table
     worksheet.eachRow((row, rowNumber) => {
       row.eachCell((cell) => {
         cell.border = {
@@ -222,7 +214,6 @@ const downloadDeviceHistory = async (req, res) => {
       });
     });
 
-    // Save and send the file
     const downloadsPath = path.join(os.homedir(), "Downloads");
     const filePath = path.join(downloadsPath, "device_history.xlsx");
 

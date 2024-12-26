@@ -59,7 +59,7 @@ header {
   display: none;
 }
 
-@media (max-width: 320px) {
+@media (max-width: 515px) {
   .announcement-bar {
     height: 30px; 
   }

@@ -37,7 +37,7 @@ const AdminMain = () => {
                 <img src={icon1} alt="icon" style={{ width: "50px", height: "50px" }} />
               </IconButton>
               <Typography variant="h6">
-                Информация администратора
+                Информация метролога
               </Typography>
               <Typography variant="body2">Инфо</Typography>
             </CardContent>

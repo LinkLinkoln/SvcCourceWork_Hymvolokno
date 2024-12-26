@@ -209,8 +209,14 @@ const Header = () => {
           >
             <PersonIcon />
           </IconButton>
-          <IconButton component={Link} href="/event" sx={{ color: "white", marginRight: "10px" }}>
-            <EventIcon />
+          <IconButton component={Link} href={
+              userRole === "courier"
+                ? "http://localhost:3000/AdminEvents"
+                : userRole === "client"
+                ? "/event"
+                : "/login"
+            }sx={{ color: "white", marginRight: "10px" }}>
+            <EventIcon  />
           </IconButton>
         </Box>
       </Slide>

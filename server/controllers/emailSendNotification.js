@@ -21,7 +21,7 @@ const subscribeUser = (req, res) => {
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error("Error sending email:", error);  
-      return res.status(500).send("Error sending email");  
+      return res.status(400).send("Error sending email");  
     }
     console.log("Email sent:", info.response);  
     return res.status(200).send("Email sent successfully");
