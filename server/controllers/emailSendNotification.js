@@ -1,10 +1,10 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Или другой SMTP-сервис
+  service: "gmail", 
   auth: {
-    user: "sednemail75@gmail.com", // Ваш email
-    pass: "becv yclz gngs nulq", // Пароль или app password
+    user: "sednemail75@gmail.com", 
+    pass: "becv yclz gngs nulq", 
   },
 });
 
@@ -20,10 +20,10 @@ const subscribeUser = (req, res) => {
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.error("Error sending email:", error);  // Логируем ошибку
-      return res.status(500).send("Error sending email");  // Возвращаем ошибку клиенту
+      console.error("Error sending email:", error);  
+      return res.status(500).send("Error sending email");  
     }
-    console.log("Email sent:", info.response);  // Логируем успешную отправку
+    console.log("Email sent:", info.response);  
     return res.status(200).send("Email sent successfully");
   });
 };
