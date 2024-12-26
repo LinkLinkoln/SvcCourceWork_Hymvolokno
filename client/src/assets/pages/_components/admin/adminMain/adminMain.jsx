@@ -9,7 +9,6 @@ import EditClientModal from "../../modal/clientModal/clientModal";
 
 const AdminMain = () => {
 
-  /* Модальное окно для выхода */
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
   const handleToggleLogoutModal = () => setOpenLogoutModal((prev) => !prev);
 
