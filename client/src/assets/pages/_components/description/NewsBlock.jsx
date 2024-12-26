@@ -56,9 +56,23 @@ const NewsCard = ({ date, title, author, category, description, link }) => (
   </Card>
 );
 
-// Главный компонент
 const NewsGrid = () => (
-    <Box sx={{ backgroundColor: '#f5f5f5', padding: '40px 0px', width: '100vw', textAlign: 'center', marginLeft: 'calc(-50vw + 49.5%)' }}>
+  <Box 
+    sx={{ 
+      backgroundColor: '#f5f5f5', 
+      width: {
+        xs: '96vw',  
+        sm: '97vw',   
+        md: '98vw',    
+        lg: '99vw',    
+      },
+      display: 'flex', 
+      flexDirection: 'column', 
+      marginLeft: "-2px",
+      alignItems: 'center', 
+      justifyContent: 'center'
+    }}
+  >
     <Typography variant="h4" component="h2" gutterBottom>
       Последние новости компании
     </Typography>

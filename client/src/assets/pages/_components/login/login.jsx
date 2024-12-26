@@ -51,7 +51,7 @@ const Login = () => {
       if (user.role === "client") {
         navigate("/client");
       } else if (user.role === "courier") {
-        navigate("/courier");
+        navigate("/Admin");
       } else {
         navigate("/admin");
       }
@@ -86,7 +86,7 @@ const Login = () => {
           backgroundColor: "#fff",
           borderRadius: "12px",
           boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-          padding: "30px",
+          padding: "10px",
         }}
       >
         <Typography variant="h5" sx={{ mb: 3, textAlign: "center", fontWeight: "bold" }}>

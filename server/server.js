@@ -12,12 +12,13 @@ const employeeyRoutes = require("./routes/employeeRoutes");
 const regulatoryDocumentRouter = require("./routes/regulatoryDocumentRoutes.js");
 const repairRequestRoutes = require("./routes/repairRequestRoutes");
 const eventRoutes = require("./routes/eventRoutes.js")
+const subscribeRoutes = require ("./routes/emailSendNotificationRoutes.js");
 const UserSeed = require("./seed/UserSeed.js")
 const DeviceSeed = require("./seed/DeviceSeed.js")
 const DocumentSeed = require("./seed/DocumentSeed.js")
+const EventSeed = require("./seed/EventSeed.js")
 require("dotenv").config();
 
-// Middleware для обработки JSON
 
 app.use(fileUpload());
 
@@ -44,11 +45,11 @@ app.post('/api/devices/upload-photo', (req, res) => {
       return res.status(500).send(err);
     }
 
-    // Send the file path to the client
     res.json({ filePath: `/api/static/${photo.name}` });
   });
 });
 
+app.use("/api/", subscribeRoutes);
 app.use("/api/devices", deviceRoutes);
 app.use("/api/calibrationSchedules", calibrationRoutes);
 app.use("/api/calibrationHistories", calibrationHistoryRoutes);
@@ -70,7 +71,7 @@ const start = async()=> {
   await UserSeed()   
   await DeviceSeed()
   await DocumentSeed()
-  //await seedTechnican()  
+  await EventSeed()
 } 
 
 

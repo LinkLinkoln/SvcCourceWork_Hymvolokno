@@ -1,9 +1,9 @@
-import ParisCup from "../_components/parisCup/parisCup";
+import MetrologyPhoto from "../_components/metrologyPhoto/metrologyPhoto";
 import Collections from "../_components/collections/MainPageGrid";
 import About from "../_components/about/about";
 import Description from "../_components/description/NewsBlock";
-import MainPageCss from "../mainPage/mainPage.css";
 import DesignLine from "../_components/designLine/DesignLine.js";
+import style from "../mainPage/mainPage.css"
 
 const aboutText = {
   title: "О НАС",
@@ -20,8 +20,8 @@ const aboutText = {
 const Main = () => {
   return (
     <div className="main-container">
-      <div className="paris-cup-container">
-        <ParisCup />
+      <div className="MetrologyPhoto-container">
+      <MetrologyPhoto />
       </div>
       <DesignLine/>
       <div className="collections-container">

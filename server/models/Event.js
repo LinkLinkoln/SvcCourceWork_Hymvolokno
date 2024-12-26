@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/config");
-const { Employee } = require("./models"); // Импорт модели Employee
+const { Employee } = require("../models/models"); // Импорт модели Employee
 
 class Event extends Model {}
 

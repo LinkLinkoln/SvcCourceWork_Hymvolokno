@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Logo from "../../../img/logo.png";
 import { Box, Typography, TextField, Button, Divider, Link } from "@mui/material";
 import Facebook from "../../../img/icons/facebook.svg";
@@ -10,19 +10,43 @@ import Card3 from "../../../img/pay/pay3.png";
 import Card4 from "../../../img/pay/pay4.png";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const handleSubscription = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        setIsSubscribed(true);
+      } else {
+        alert("Error subscribing. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error subscribing. Please try again.");
+    }
+  };
+
   return (
     <Box sx={{ backgroundColor: "#2c2c2c", padding: "40px 0", color: "#fff" }}>
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center", // Center all content
+          justifyContent: "center",
           alignItems: "flex-start",
           flexWrap: "wrap",
-          columnGap: 40, // Add spacing between the sections
+          columnGap: 40,
         }}
       >
         {/* Legal Section */}
-        <Box sx={{ textAlign: "center", marginBottom:"50px" }}>
+        <Box sx={{ textAlign: "center", marginBottom: "50px" }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Legal
           </Typography>
@@ -41,12 +65,13 @@ const Footer = () => {
         </Box>
 
         {/* Newsletter Section */}
-        <Box sx={{textAlign: "center",marginBottom:"50px" }}>
+        <Box sx={{ textAlign: "center", marginBottom: "50px" }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Newsletter
           </Typography>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            Subscribe to receive delicious weekly updates, access to exclusive deals, and more.
+            Subscribe to receive delicious weekly updates, access to exclusive
+            deals, and more.
           </Typography>
           <TextField
             fullWidth
@@ -57,9 +82,17 @@ const Footer = () => {
               borderRadius: "4px",
               marginBottom: "16px",
             }}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
-          <Button variant="contained" color="primary" sx={{ width: "100%" }}>
-            Subscribe
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ width: "100%" }}
+            onClick={handleSubscription}
+            disabled={isSubscribed}
+          >
+            {isSubscribed ? "Subscribed!" : "Subscribe"}
           </Button>
         </Box>
 
@@ -67,11 +100,11 @@ const Footer = () => {
         <Box sx={{ minWidth: "200px", textAlign: "center" }}>
           <img src={Logo} alt="Logo" style={{ width: "150px" }} />
           <Typography variant="body1" sx={{ fontStyle: "italic", mt: 2 }}>
-            IT'S ALL IN DETAILS
+            Варим по взрослому
           </Typography>
-          <Typography variant="body2">EMAIL: catering@gmail.com</Typography>
+          <Typography variant="body2">EMAIL: breakingBad@gmail.com</Typography>
           <Typography variant="body2" sx={{ color: "rgb(234, 186, 144)" }}>
-            Paris | France
+            ООО ХАЙЗЕНБЕРГ
           </Typography>
         </Box>
       </Box>
@@ -82,18 +115,18 @@ const Footer = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center", // Center the footer content
+          justifyContent: "center",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: 4, // Add spacing between sections
+          gap: 4,
           textAlign: "center",
         }}
       >
-        <Box sx={{ minWidth: "200px",  }}>
-          <Typography variant="body2">© Catering Project</Typography>
+        <Box sx={{ minWidth: "200px" }}>
+          <Typography variant="body2">© Химволокно</Typography>
         </Box>
 
-        <Box sx={{ minWidth: "200px"}}>
+        <Box sx={{ minWidth: "200px" }}>
           <Typography variant="body2">Follow Us</Typography>
           <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
             <Link href="https://www.facebook.com" sx={{ marginRight: 2 }}>

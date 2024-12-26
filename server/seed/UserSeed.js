@@ -7,24 +7,36 @@ async function seedEmployees() {
       lastName: 'Doe',
       name: 'John',
       fatherName: 'Smith',
-      position: 'Manager',
+      position: 'Ciient',
       phone: '123-56-7890',
       email: 'a@gmail.com',
       role: 'client',
-      password: '123456', // Замените на безопасный хеш пароля
+      password: '123456', 
       
     },
     {
       lastName: 'Deoe',
       name: 'Joheeeen',
       fatherName: 'Smieeeeth',
-      position: 'Manager',
+      position: 'Admin',
       phone: '125-56-7890',
-      email: 'aa@gmail.com',
+      email: 'b@gmail.com',
       role: 'courier',
-      password: '123456', // Замените на безопасный хеш пароля
+      password: '123456', 
       
-    }
+    },
+    {
+      lastName: 'Maxim',
+      name: 'Kiselev',
+      fatherName: 'Smith',
+      position: 'Ciient',
+      phone: '123-56-7890',
+      email: 'aa@gmail.com',
+      role: 'client',
+      password: '123456', 
+      
+    },
+    
   ];
 
   try {

@@ -39,11 +39,11 @@ const ClientMain = () => {
     <div>
       <div className="clientContainer">
         <div className="block">
-          <a href="/cart">
+          <a href="/DeviceList">
             <img alt="icon" src={icon2}></img>
           </a>
           <div className="blockText">
-            <a href="/cart">СПИСОК ПРИБОРОВ</a>
+            <a href="/DeviceList">СПИСОК ПРИБОРОВ</a>
             <p>Рассчитать параметры для ваших измерений (в один клик)</p>
           </div>
         </div>
@@ -71,12 +71,12 @@ const ClientMain = () => {
           </div>
         </div>
         <div className="block">
-          <a href="/client/addReview">
+          <a href="/client/Documents">
             <img alt="icon" src={icon4}></img>
           </a>
           <div className="blockText">
-            <a href="/client/addReview">ОТЗЫВЫ О ПРИБОРАХ</a>
-            <p>Добавьте отзыв по завершении измерений.</p>
+            <a href="/client/Documents">Список документов</a>
+            <p>Просмотреть список документов</p>
           </div>
         </div>
       </div>

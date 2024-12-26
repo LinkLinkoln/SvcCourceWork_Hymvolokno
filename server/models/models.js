@@ -1,7 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/config");
 
-// Сотрудник
 const Employee = sequelize.define(
   "Employee",
   {
@@ -49,8 +48,6 @@ const Employee = sequelize.define(
     timestamps: false,
   }
 );
-
-// Приборы
 const Device = sequelize.define(
   "Device",
   {
@@ -95,7 +92,6 @@ const Device = sequelize.define(
   }
 );
 
-// График поверок EVENT
 const CalibrationSchedule = sequelize.define(
   "CalibrationSchedule",
   {
@@ -135,7 +131,6 @@ const CalibrationSchedule = sequelize.define(
   }
 );
 
-// История поверок
 const CalibrationHistory = sequelize.define(
   "CalibrationHistory",
   {
@@ -170,7 +165,6 @@ const CalibrationHistory = sequelize.define(
   }
 );
 
-// Нормативные документы
 const RegulatoryDocument = sequelize.define(
   "RegulatoryDocument",
   {
@@ -191,7 +185,7 @@ const RegulatoryDocument = sequelize.define(
       type: DataTypes.TEXT,
     },
     file: {
-      type: DataTypes.STRING, //путь к файлу
+      type: DataTypes.STRING,
     },
   },
   {
@@ -200,7 +194,6 @@ const RegulatoryDocument = sequelize.define(
   }
 );
 
-// Калибровочные данные
 const CalibrationData = sequelize.define(
   "CalibrationData",
   {
@@ -235,7 +228,6 @@ const CalibrationData = sequelize.define(
   }
 );
 
-// Токен
 const Token = sequelize.define(
   "Token",
   {
@@ -278,12 +270,10 @@ const Token = sequelize.define(
   }
 );
 
-// Триггер для обновления updatedAt токена
 Token.beforeUpdate((token) => {
   token.updatedAt = new Date();
 });
 
-// Заявки на ремонт
 const RepairRequest = sequelize.define(
   "RepairRequest",
   {
@@ -327,7 +317,6 @@ const RepairRequest = sequelize.define(
   }
 );
 
-// Связи
 Device.hasMany(CalibrationSchedule, { foreignKey: "deviceId" });
 CalibrationSchedule.belongsTo(Device, { foreignKey: "deviceId" });
 

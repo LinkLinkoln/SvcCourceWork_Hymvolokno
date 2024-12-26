@@ -4,60 +4,67 @@ const sequelize = require('../config/config'); // Путь к вашему ко�
 async function seedDevices() {
   const devices = [
     {
-      name: 'Temperature Sensor',
-      type: 'Sensor',
+      name: 'Микрометр',
+      type: 'Калибровочные приборы',
       serialNumber: 'TS-12345',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 12, // Интервал в месяцах
+      calibrationInterval: 10, 
       currentStatus: 'Operational',
+      devicePhoto: '1.jpg'
     },
     {
-      name: 'Temperature Sensor',
-      type: 'Sensor',
+      name: 'Штангенциркуль',
+      type: 'Калибровочные приборы',
       serialNumber: 'TS-1245',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 8, // Интервал в месяцах
+      calibrationInterval: 8, 
       currentStatus: 'Operational',
+      devicePhoto: '2.png'
     },
     {
-      name: 'Temperature Sensor',
-      type: 'Sensor',
+      name: 'Термометр',
+      type: 'Цифровые измерительные приборы',
       serialNumber: 'TS-1235',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 4, // Интервал в месяцах
+      calibrationInterval: 4, 
       currentStatus: 'Operational',
+      devicePhoto: '3.jpg'
     },
     {
-      name: 'Temperature Sensor',
-      type: 'Sensor',
+      name: 'Осциллографов',
+      type: 'Цифровые измерительные приборы',
       serialNumber: 'TS-132345',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 12, // Интервал в месяцах
+      calibrationInterval: 1, 
       currentStatus: 'Operational',
+      devicePhoto: '4.jpg'
     },
     {
-      name: 'Ter',
-      type: 'Sensor',
+      name: 'Весы',
+      type: 'Физические устройства',
       serialNumber: 'TS-122345',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 12, // Интервал в месяцах
+      calibrationInterval: 2, 
       currentStatus: 'Operational',
+      devicePhoto: '5.jpg'
     },
     {
-      name: 'Tempe',
-      type: 'Sensor',
+      name: 'Барометр',
+      type: 'Физические устройства',
       serialNumber: 'TS-1225',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 12, // Интервал в месяцах
+      calibrationInterval: 14, 
       currentStatus: 'Operational',
+      devicePhoto: '6.jpg'
     },
     {
-      name: 'Temperatur',
-      type: 'Sensor',
+      name: 'Микроскоп',
+      type: 'Физические устройства',
       serialNumber: 'TS-15',
       commissioningDate: new Date('2023-01-15'),
-      calibrationInterval: 12, // Интервал в месяцах
+      calibrationInterval: 6, 
       currentStatus: 'Operational',
+      devicePhoto: '7.jpg'
     },
     
   ];

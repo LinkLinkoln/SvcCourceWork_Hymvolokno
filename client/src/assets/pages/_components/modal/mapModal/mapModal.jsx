@@ -40,7 +40,8 @@ const MapModal = ({ open, onClose }) => {
         </Typography>
         <Box sx={{ height: "400px", backgroundColor: "#e0e0e0", mt: 2 }}>
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3327.032174923079!2d2.3294471331254027!3d48.859195230523866!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e1f06e2b70f%3A0x40b82c3688c9460!2z0J_QsNGA0LjQtiwg0KTRgNCw0L3RhtC40Y8!5e0!3m2!1sru!2sby!4v1731228723304!5m2!1sru!2sby"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3023.4776284002116!2d-74.00601508459459!3d40.71277577933029!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259afac81d619%3A0x4c3761393a083663!2sNew%20York%2C%20NY!5e0!3m2!1sen!2sus!4v1731228723304!5m2!1sen!2sus"
+
             width="100%"
             height="100%"
             style={{ border: 0 }}

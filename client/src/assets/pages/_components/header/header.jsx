@@ -10,11 +10,11 @@ import "./header.css";
 import Logo from "../../../img/logo.png";
 import MapModal from "../../_components/modal/mapModal/mapModal";
 import EditClientModal from "../../_components/modal/clientModal/clientModal";
-import EditCourierModal from "../../_components/modal/courierModal/courierModal";
+import ListIcon from '@mui/icons-material/List';
+import EventIcon from '@mui/icons-material/Event';
 
 const Header = () => {
   const [openModal, setOpenModal] = useState(false);
-  const [openEditCourierModal, setOpenEditCourierModal] = useState(false);
   const [openEditClientModal, setOpenEditClientModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); 
   const navigate = useNavigate();
@@ -23,10 +23,6 @@ const Header = () => {
 
   const handleToggleModal = () => {
     setOpenModal(!openModal);
-  };
-
-  const handleToggleEditCourierModal = () => {
-    setOpenEditCourierModal((prev) => !prev);
   };
 
   const handleToggleEditClientModal = () => {
@@ -59,11 +55,8 @@ const Header = () => {
           boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Typography variant="body2" color="text.secondary">
-          NEXT DAY DELIVERY, MINIMUM $100 + GST
-        </Typography>
-      </Box>
 
+      </Box>
       <Divider />
 
       <Box
@@ -113,7 +106,7 @@ const Header = () => {
               </Typography>
               <Link
                 className="gotoAuthorization"
-                onClick={userRole === "client" ? handleToggleEditClientModal : handleToggleEditCourierModal}
+                onClick={handleToggleEditClientModal}
                 underline="hover"
                 color="white"
                 sx={{
@@ -157,23 +150,23 @@ const Header = () => {
           </IconButton>
 
           <IconButton
+          
             onClick={() => {
               if (userRole === "client") {
                 handleToggleEditClientModal();
-              } else if (userRole === "courier") {
-                handleToggleEditCourierModal();
               } else {
                 navigate("/login");
               }
             }}
             sx={{ color: "white", marginRight: "16px" }}
           >
+            
             <PersonIcon />
           </IconButton>
 
           {userRole === "client" && (
-            <IconButton component={Link} href="/cart" sx={{ color: "white" }}>
-              <ShoppingCartIcon />
+            <IconButton component={Link} href="/DeviceList" sx={{ color: "white" }}>
+              <ListIcon  />
             </IconButton>
           )}
         </Box>
@@ -184,22 +177,18 @@ const Header = () => {
       {userRole === "client" && (
         <EditClientModal clientId={userid} open={openEditClientModal} onClose={handleToggleEditClientModal} />
       )}
-      {userRole === "courier" && (
-        <EditCourierModal open={openEditCourierModal} onClose={handleToggleEditCourierModal} />
-      )}
-
       <Slide direction="left" in={menuOpen} mountOnEnter unmountOnExit>
         <Box
           className="navigation-icons"
           sx={{
             position: "absolute",
-            top: "140px", // Отступ сверху, чтобы меню не перекрывало другие элементы
-            right: "30px", // Размещение меню от правой стороны
+            top: "140px",
+            right: "30px", 
             backgroundColor: "#333",
             padding: "10px",
             borderRadius: "5px",
             display: "flex",
-            flexDirection: "row", // Горизонтальное выезжание
+            flexDirection: "row",
             boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
             zIndex: 500
           }}
@@ -207,27 +196,21 @@ const Header = () => {
           <IconButton component={Link} href="/" sx={{ color: "white", marginRight: "10px" }}>
             <MapIcon />
           </IconButton>
-          <IconButton component={Link} href="/dishes" sx={{ color: "white", marginRight: "10px" }}>
-            <ShoppingCartIcon />
-          </IconButton>
           <IconButton
             component={Link}
             href={
               userRole === "courier"
-                ? "http://localhost:3000/courier"
+                ? "http://localhost:3000/Admin"
                 : userRole === "client"
                 ? "/client"
-                : "/reviews"
+                : "/login"
             }
             sx={{ color: "white", marginRight: "10px" }}
           >
             <PersonIcon />
           </IconButton>
           <IconButton component={Link} href="/event" sx={{ color: "white", marginRight: "10px" }}>
-            <ShoppingCartIcon />
-          </IconButton>
-          <IconButton component={Link} href="/map" sx={{ color: "white" }}>
-            <MapIcon />
+            <EventIcon />
           </IconButton>
         </Box>
       </Slide>

@@ -149,16 +149,20 @@ const EventManager = () => {
     setConfirmDeleteOpen(false);
   };
 
+  
+
   return (
     <Box sx={{ color: "rgba(128, 96, 68, 1)", marginBottom: "40px" }}>
       <Button
-        variant="contained"
-        color="primary"
-        onClick={() => openModal()}
-        sx={{ marginBottom: 2 }}
+      variant="contained"
+      color="primary"
+      sx={{ marginBottom: 2 }}
+      component="a" // Use the <a> tag to handle navigation
+      href="/event" 
       >
         Add Event
-      </Button>
+</Button>
+
       <TableContainer>
         <Table>
           <TableHead>

@@ -5,8 +5,6 @@ const handleError = (res, error) => {
   console.error("Error:", error);
   res.status(500).json({ error: error.message });
 };
-
-// Получение всех мероприятий клиента
 const getEvents = async (req, res) => {
   try {
     const { employeeId } = req.query;
@@ -18,12 +16,10 @@ const getEvents = async (req, res) => {
 };
 
 
-// Добавление мероприятия
 const addEvent = async (req, res) => {
   try {
     const { date, address } = req.body;
 
-    // Проверяем, что для этой конкретной даты и адреса нет забронированного события
     const existingEvent = await Event.findOne({
       where: { date, address }
     });
@@ -32,7 +28,6 @@ const addEvent = async (req, res) => {
       return res.status(400).json({ message: "Date and address are already booked" });
     }
 
-    // Создаем новое событие
     const event = await Event.create(req.body);
     res.status(201).json(event);
   } catch (error) {
@@ -48,18 +43,11 @@ const editEvent = async (req, res) => {
 
     const { date, ...rest } = req.body;
 
-    // Проверка даты мероприятия
     const currentDate = new Date();
     const eventDate = new Date(event.date);
     const daysDifference = (eventDate - currentDate) / (1000 * 60 * 60 * 24);
 
-    if (daysDifference < 5) {
-      return res.status(400).json({
-        message: "Event cannot be edited within 5 days of its start date",
-      });
-    }
 
-    // Проверка наличия даты
     if (date && date !== event.date) {
       const existingEvent = await Event.findOne({ where: { date } });
       if (existingEvent)
